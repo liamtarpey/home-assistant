@@ -1,0 +1,34 @@
+# PROPOSALS ONLY. Written but not confirmed on the user's setup.
+# Goal: make the Switch 2 card go live and off within seconds using the Fire TV's HDMI port states
+# (HDMI 1 = HW4: state 0 when the Switch is on, 1 in standby), instead of Nintendo's slow data.
+# The user still has to run the ADB command with the Switch on and then off to confirm that the port flips.
+
+# A) Read the HDMI port states every 20 seconds while the TV is on (automation)
+- alias: Read HDMI port states while the TV is on
+  mode: single
+  triggers:
+    - trigger: time_pattern
+      seconds: "/20"
+  conditions:
+    - condition: template
+      value_template: "{{ states('media_player.fire_tv_192_168_1_110') not in ['off', 'standby', 'unavailable', 'unknown'] }}"
+  actions:
+    - action: androidtv.adb_command
+      target:
+        entity_id: media_player.fire_tv_192_168_1_110
+      data:
+        command: dumpsys tv_input | grep -E "HDMIInputService/HW[456]: info"
+
+# B) In configuration.yaml under template: a "Switch 2 powered" sensor reading HDMI 1 (HW4)
+#  - binary_sensor:
+#      - name: Switch 2 powered
+#        unique_id: switch_2_powered
+#        device_class: power
+#        state: >
+#          {% if states('media_player.fire_tv_192_168_1_110') in ['off', 'standby', 'unavailable', 'unknown'] %}{{ none }}
+#          {% else %}
+#            {% set m = state_attr('media_player.fire_tv_192_168_1_110', 'adb_response') | string | regex_findall('HW4: info:.*?state: ([0-9])') %}
+#            {{ (m[0] == '0') if m | count > 0 else none }}
+#          {% endif %}
+
+# C) switch_2_active should then prefer binary_sensor.switch_2_powered when it is on or off, and fall back to Nintendo's data otherwise.

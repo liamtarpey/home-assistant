@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart home plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #eef1f4; --surface: #ffffff; --ink: #16212c; --muted: #5b6875; --line: #d5dce3;
+  --accent: #e8a317; --accent-ink: #5a3d00; --done: #2f7d5b; --band: #16212c; --band-ink: #f3f5f7;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f161d; --surface: #18222c; --ink: #e8edf2; --muted: #97a5b3; --line: #2a3745;
+    --accent: #f0b43a; --accent-ink: #f0b43a; --done: #5cc28f; --band: #0a0f14; --band-ink: #e8edf2;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f161d; --surface: #18222c; --ink: #e8edf2; --muted: #97a5b3; --line: #2a3745;
+  --accent: #f0b43a; --accent-ink: #f0b43a; --done: #5cc28f; --band: #0a0f14; --band-ink: #e8edf2;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 20px 64px; }
+header.top { background: var(--band); color: var(--band-ink); margin: 0 -20px 28px; padding: 36px 20px 28px; }
+header.top h1 { margin: 0 0 10px; font-size: 2.1rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+header.top p { margin: 0; max-width: 52ch; opacity: .85; }
+.progress { margin-top: 22px; }
+.bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.18); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s ease; }
+.progress small { display: block; margin-top: 6px; opacity: .75; }
+.answer { background: var(--surface); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 0 8px 8px 0; margin-bottom: 28px; }
+.answer strong { display: block; margin-bottom: 2px; }
+h2.tier { font-size: 1.6rem; letter-spacing: -0.02em; margin: 40px 0 4px; padding-bottom: 6px; border-bottom: 3px solid var(--accent); }
+p.tiernote { color: var(--muted); margin: 6px 0 16px; font-size: .93rem; }
+h2 { font-size: 1.2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+.phase { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 18px 8px; margin-bottom: 16px; }
+.phase .meta { color: var(--muted); font-size: .9rem; margin: 0 0 12px; }
+ul.tasks { list-style: none; margin: 0; padding: 0; }
+ul.tasks li { border-top: 1px solid var(--line); }
+ul.tasks label { display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; cursor: pointer; }
+ul.tasks input { appearance: none; -webkit-appearance: none; flex: none; width: 22px; height: 22px; margin: 1px 0 0; border: 2px solid var(--muted); border-radius: 6px; background: transparent; cursor: pointer; display: grid; place-content: center; }
+ul.tasks input::after { content: ""; width: 10px; height: 6px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: rotate(-45deg) translate(1px,-1px); opacity: 0; }
+ul.tasks input:checked { background: var(--done); border-color: var(--done); }
+ul.tasks input:checked::after { opacity: 1; }
+ul.tasks input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+ul.tasks input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+ul.tasks span small { display: block; color: var(--muted); font-size: .88rem; text-decoration: none; }
+.gate { margin: 4px 0 14px; padding: 10px 12px; background: color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 8px; color: var(--accent-ink); font-size: .93rem; }
+.scroll { overflow-x: auto; margin: 8px 0 28px; }
+table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); font-size: .93rem; min-width: 540px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 700; background: color-mix(in srgb, var(--line) 40%, transparent); }
+tr:last-child td { border-bottom: 0; }
+h3 { margin: 32px 0 10px; font-size: 1.1rem; }
+.decide li, .rules li { margin-bottom: 6px; }
+button.reset { margin-top: 28px; background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 8px; padding: 8px 14px; font: inherit; cursor: pointer; }
+button.reset:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+ul.done { list-style: none; margin: 0; padding: 0; }
+ul.done li { padding: 9px 0 9px 28px; border-top: 1px solid var(--line); position: relative; }
+ul.done li::before { content: "\2713"; position: absolute; left: 4px; color: var(--done); font-weight: 700; }
+ul.done small { display: block; color: var(--muted); font-size: .88rem; }
+.open li::before { content: "!" !important; color: var(--accent-ink) !important; }
+footer { color: var(--muted); font-size: .85rem; margin-top: 20px; }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>Smart home plan</h1>
+  <p>Running on a Raspberry Pi 5 with Home Assistant. Lighting, scenes, Fire TV, dashboards and a wall iPad are live. Waiting on the Zigbee radio, blinds, heating and security.</p>
+  <div class="progress">
+    <div class="bar"><i id="fill"></i></div>
+    <small id="count">0 of 0 done</small>
+  </div>
+</header>
+
+<div class="answer">
+  <strong>About this home</strong>
+  Top-floor flat with a large terrace and a dog. Your dad is an electrician for the mains work; gas work needs a Gas Safe engineer.
+</div>
+
+<h3>Shopping list</h3>
+<div class="scroll">
+<table>
+  <thead><tr><th>When</th><th>Item</th><th>Buy</th><th>Approx. price</th></tr></thead>
+  <tbody>
+    <tr><td>Bought</td><td>Lounge uplights</td><td>Small hideable GU10 floor uplighters with a foot switch, with WiZ colour GU10 Wi-Fi bulbs (2-pack bought for £16.84, 2,200K warm, dims to 1%), which work with the Pi alone. Innr Zigbee bulbs are the alternative once the ZBT-2 arrives, plus one Lighting Styles textured black and satin brass uplighter with a matching Innr Zigbee E27 bulb as the bigger statement light</td><td>check current price; brass £129.60</td></tr>
+    <tr><td>Bought</td><td>Hub</td><td>Raspberry Pi 5 starter kit (4GB), wired to the router, plus a microSD-to-SD adapter or USB card reader for flashing from the MacBook</td><td>£162.10, running</td></tr>
+    <tr><td>Now</td><td>Zigbee radio</td><td>Home Assistant Connect ZBT-2 (comes with its own 1.5m USB cable, so no extension needed)</td><td>£38, sold out at The Pi Hut, use Notify me</td></tr>
+    <tr><td>Now</td><td>Remote access</td><td>Home Assistant Cloud</td><td>about £6.50 a month</td></tr>
+    <tr><td>Now</td><td>Studio power</td><td>Tapo P304M smart power strip (UK, four sockets switched separately, energy monitoring, 13A in total). Start with the two speakers on one socket through a small two-way extension, then add the amps and the OX box</td><td>about £30-38</td></tr>
+    <tr><td>Now</td><td>Blinds</td><td>4 made-to-measure roller blinds (3 lounge, 1 office) with Somfy io rechargeable motors</td><td>quote from the maker</td></tr>
+    <tr><td>Now</td><td>Blind hub</td><td>Somfy TaHoma Switch, used locally with Home Assistant</td><td>about £180</td></tr>
+    <tr><td>Soon</td><td>Heating</td><td>5 Shelly Plus 1 dry-contact relays and 5 Aqara temperature and humidity sensors, or ProWarm ProTouch iQ ST touchscreen thermostats (buy one first and test it with Home Assistant; the store offers 30 days to refund)</td><td>about £150-250</td></tr>
+    <tr><td>Soon</td><td>Hob safety</td><td>Aqara temperature sensor above the hob and an Aqara FP1E presence sensor in the kitchen</td><td>about £50</td></tr>
+    <tr><td>Soon</td><td>Fridge and freezer</td><td>Aqara door sensors, an Aqara temperature sensor in the freezer, a Shelly Plus Plug UK on the socket</td><td>about £50</td></tr>
+    <tr><td>Soon</td><td>Leaks</td><td>3 Aqara water leak sensors</td><td>about £30</td></tr>
+    <tr><td>Soon</td><td>Oven</td><td>Shelly EM Gen3 clamp monitor fitted by your dad, if the oven is hardwired</td><td>about £30</td></tr>
+    <tr><td>Soon</td><td>Ceiling spots</td><td>Dimmable LED GU5.3 (12V MR16) bulbs, and a Shelly Wi-Fi dimmer per wall switch, fitted with your dad</td><td>bulbs a few pounds each, dimmers about £20-30 (not checked)</td></tr>
+    <tr><td>Soon</td><td>Cameras and doorbell</td><td>Reolink 4K PoE cameras with pet detection, a Reolink PoE video doorbell, and a PoE switch</td><td>check current price</td></tr>
+    <tr><td>Soon</td><td>Security sensors</td><td>Door and window sensors on every opening, vibration sensors on the terrace doors, an indoor siren</td><td>check current price</td></tr>
+    <tr><td>Soon</td><td>Smart lock</td><td>A retrofit lock that fits over your existing lock</td><td>check current price</td></tr>
+    <tr><td>Later</td><td>Plugs</td><td>Energy-monitoring plugs for the washing machine, dishwasher, consoles and audio gear, and outdoor-rated plugs for terrace lights</td><td>about £15-25 each</td></tr>
+    <tr><td>Bought</td><td>Wi-Fi light strips</td><td>TP-Link Tapo L900-5 (5m, Wi-Fi, RGB), one per run: under the TV and along the sides of the room. Works with the Pi alone through Home Assistant's TP-Link integration</td><td>bought 3: two for the lounge sides meeting in the middle, one under the TV unit</td></tr>
+    <tr><td>Later</td><td>Light strips</td><td>For the 10m indoor run: the Philips Hue Essential 10m strip (Bluetooth and Zigbee, cuttable) on a single plug. Test it with the hub before cutting, and keep the receipt. Innr Outdoor Flex Light Colour for the terrace</td><td>about £93 for the 10m strip</td></tr>
+    <tr><td>Later</td><td>Wall buttons</td><td>A Philips Hue Dimmer Switch (or similar Zigbee wall dimmer) per room, so real buttons still dim and trigger scenes</td><td>check current price</td></tr>
+    <tr><td>Later</td><td>Screens and voice</td><td>Optional bigger wall panel (such as the Apolosign 21.5) to replace the iPad, and Home Assistant's voice speaker</td><td>check current price</td></tr>
+    <tr><td>Later</td><td>Office air</td><td>A true CO2 sensor</td><td>check current price</td></tr>
+    <tr><td>Later</td><td>Studio MIDI box</td><td>An ESP32 board with a MIDI input circuit, a 5-pin MIDI cable and a phone charger. It carries Logic's recording signal from the Focusrite's MIDI out to Home Assistant over your Wi-Fi, without touching the work laptop</td><td>about £15</td></tr>
+    <tr><td>Later</td><td>Studio Mac</td><td>A Mac mini kept at home just for Logic and the studio, which can talk to Home Assistant directly</td><td>check current price</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 class="tier">Done</h2>
+<p class="tiernote">What is built and working today.</p>
+
+<section class="phase">
+  <h2>Platform</h2>
+  <ul class="done">
+    <li>Raspberry Pi 5 (4GB starter kit) running Home Assistant OS, on Ethernet<small>The Zigbee radio (ZBT-2) is still on notify-me because it is sold out</small></li>
+    <li>Companion app on your phone and the wall iPad, HACS, a theme, Mushroom cards, button-card and Team Tracker installed</li>
+    <li>Pi health: System Monitor sensors, an alert automation and two header badges (temperature, storage and memory)</li>
+    <li>configuration.yaml holds the Switch, PS5, Octopus, TfL and weather-forecast sensors, a RAWG artwork lookup, and a PS5 cover-saving command<small>Always press Check configuration before restarting: one wrong indent made the file invalid once</small></li>
+    <li>All the dashboard cards share button-card templates kept at the top of the dashboard's raw configuration: glass_card (height, corners, label and title text, pulse dot), glass_dim (the fade to dark), glass_title (top-left name), glass_cta and glass_power_btn (the top-right power button)<small>Change a height or font once there and every card follows. Every card is 250px high</small></li>
+    <li>Pyscript and the git repository for scripts are still to do (see Custom scripting)</li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>Lighting and scenes</h2>
+  <ul class="done">
+    <li>Lounge uplights: two foot-switch GU10 fittings with WiZ colour GU10 bulbs, plus the WiZ bulbs in "candle lamp lounge" and "main lamp lounge"</li>
+    <li>Three Tapo L900-5 strips: two along the lounge sides and one under the TV unit<small>Firmware auto-update turned off; connection reliability is still to confirm over time</small></li>
+    <li>A group called "all lounge lights" that Movie mode turns on and off</li>
+    <li>Scenes: Movie, Party, Sleep, Off, Pink bright and Pink dim</li>
+    <li>Lounge lights card: LOUNGE LIGHTS top left, a line such as ● ON SINCE 19:42 (or OFF SINCE 20:15 with no dot), and a title that names the scene (Movie lights, Sleep lights, Dim pink lights, Lights off)<small>It shows the last scene you pressed, since Home Assistant cannot tell when the lights stop matching a scene. The card dims when Off was last</small></li>
+    <li>The scenes are a row of round buttons (icons for Movie, Party and Sleep, solid colour discs for the two pinks), with a ring on the active one<small>The round power button top right turns everything off, and opens Movie mode when the lights are already off</small></li>
+    <li>Scenes re-apply themselves one second after any scene fires, to fix Tapo strips that sometimes miss the first command</li>
+    <li>Header badges: lights currently on, Switch 2 screen time, West Ham matchday traffic</li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>Fire TV</h2>
+  <ul class="done">
+    <li>Connected over ADB, with the app IDs mapped: YouTube (com.amazon.firetv.youtube), Prime Video (com.amazon.firebat), Netflix (com.netflix.ninja), Saturn (ar.tvplayer.t2), NordVPN (com.nordvpn.android)</li>
+    <li>One TV card replaces the three earlier ones, in the same style as the games cards: FIRE TV top left, each app in its own colour and icon, and previous, play/pause and next buttons on the same row as the app name (the name is shortened with … if it gets close to them)<small>The Sonos volume slider (media_player.tv_sonos) is a tile cropped to just the slider</small></li>
+    <li>A round power button top right, the same as on the lights card: a power icon when the TV is on, a crossed-out one on grey when it is off, and tapping turns it on or off</li>
+    <li>On an HDMI input the TV only says inputpreference.service, so the card names PlayStation 5 or Nintendo Switch 2 from the consoles' own statuses<small>If both consoles are on it favours the PS5. The TV's hdmi_input attribute is empty, so it cannot read the actual port yet</small></li>
+    <li>Movie mode automation: starts when Prime Video (com.amazon.firebat) or YouTube (com.amazon.firetv.youtube) opens after dark, also at sunset if one of them is already open, and switches to Off mode when you leave, only if Movie mode started it</li>
+    <li>Known limits: the TV does not report video titles, screenshots come out corrupt, the backlight cannot be set, and Saturn (ar.tvplayer.t2) reports its play state unreliably so the card shows "Watching"</li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>PlayStation</h2>
+  <ul class="done">
+    <li>PlayStation Network integration connected, with your account's activity privacy set to Anyone</li>
+    <li>PS5 card: PLAYSTATION 5 top left, full-width cover art with a dark fade, the title in large white type, a pulsing green dot while a game is on, and a darker LAST PLAYED state that fades in when the console goes off</li>
+    <li>The label reads LAST PLAYED · 4 MIN. Sony gives no playtime, so a template sensor counts one minute for every minute a game is on screen, per game, resetting each day</li>
+    <li>The last cover is saved to a file whenever a game starts, so it stays after the console is off<small>A cover-version helper changes after each save so browsers and the iPad fetch the new file. The save command uses port 80 and writes the file directly</small></li>
+    <li>The PS5 and Switch cards sit in one stack that reorders itself: whichever console is active moves to the top, and the PS5 stays on top if both or neither are active<small>Each card is in the stack twice, once per position, and only the right two show</small></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>Nintendo Switch 2</h2>
+  <ul class="done">
+    <li>Switch card in the same style as the PS5 card: NINTENDO SWITCH 2 top left, the same gradient and 250px height, large title, LAST PLAYED · N MIN label, pulsing dot while active, and the darker idle state</li>
+    <li>Game and minutes come from Nintendo's Device usage report, polled every 5 minutes<small>A game that appears for the first time today wins. If exactly one game's minutes rise, that is the current game. If several rise together (a sync), the card keeps the current game. A change log attribute on sensor.switch_2_last_game records the last six changes</small></li>
+    <li>"Playing now" comes from a last-active sensor that notes genuine changes in used screen time and ignores Home Assistant restarts, re-checked every minute with an 8-minute window</li>
+    <li>Widescreen artwork from RAWG (free key kept in secrets.yaml), looked up when the game changes, falling back to Nintendo's small icon<small>The picture sits on its own layer, shifted 20px up and set to cover, so it fills the card. Check matched_name on sensor.switch_2_artwork if a game shows the wrong picture</small></li>
+    <li>Known limit: Nintendo records a game only after real play begins, so the card changes roughly 5 minutes in, and menus do not count</li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>Spotify</h2>
+  <ul class="done">
+    <li>Spotify card (media_player.lounge_spotify) in the same style: SPOTIFY top left, album art filling the card, the track title in large type, the artist next to a pulsing dot while it plays, and PAUSED · ARTIST when paused<small>When nothing is playing the line above the title is left blank, so Spotify is not shown twice</small></li>
+    <li>A thin progress bar that slides along on its own, plus shuffle, previous, play/pause, next and repeat buttons</li>
+    <li>A speaker pill top right shows the current device and opens the player's popup, where the Source dropdown lets you pick a device<small>Spotify only lists devices it has seen recently, and Home Assistant cannot wake one it does not know. Open Spotify on the speaker first, or use the Spotcast add-on</small></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>Weather</h2>
+  <ul class="done">
+    <li>A forecast sensor (sensor.weather_daily_forecast) asks weather.forecast_home for the daily forecast every 30 minutes and keeps it as JSON<small>Home Assistant no longer gives cards the forecast directly, so this sensor is what the card reads</small></li>
+    <li>Weather card: a large temperature in °C, the condition, today's high and low, rain chance when it is 30% or more, and the next five days as frosted pills</li>
+    <li>The whole card changes with the weather and the time of day: a yellow sunny sky with a pulsing sun, a navy night sky with twinkling yellow stars and a moon glow, grey clouds that drift, rain and snow that fall, and flashes in thunder<small>The sun entity decides day or night, and a chip top left shows the next SUNSET or SUNRISE time</small></li>
+    <li>If the forecast is missing, the label says exactly why (sensor missing, attribute missing, unreadable or empty)</li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>Wall screen and dashboards</h2>
+  <ul class="done">
+    <li>iPad on the wall running Companion Kiosk Mode, with a screensaver that wakes on camera motion<small>A larger 21-inch Android panel (such as the Apolosign 21.5) is an optional later upgrade</small></li>
+    <li>TfL view: status for every line with roundel icons, disruption cards that only appear when a line is disrupted, and live next DLR trains from Stratford High Street in both directions</li>
+    <li>West Ham matchday traffic: Team Tracker on the Championship (eng.2), a helper that turns on 3 hours before kick-off and off 4 hours after, and a red header badge, home games only</li>
+    <li>Wolfie feeding reminders at 09:30 and 18:00, with a Done button on the notification and a badge that shows only when a meal is due</li>
+    <li>Utilities view: Octopus electricity and gas (yesterday, month so far, rates, average, projection) and water at a fixed £56 a month<small>Month totals come from the Energy dashboard statistics, backfilled for October</small></li>
+    <li>Wansview camera: RTSP works in VLC; add it to Home Assistant with the Generic Camera integration if you have not</li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>Open questions to look at</h2>
+  <ul class="done open">
+    <li>The Energy page shows about £615 for October, the Utilities view about £160, so one of them is wrong<small>Compare with the Octopus totals and look for a day with a huge bar</small></li>
+    <li>card-mod 4 is installed and loaded but its styling does not apply, so red-card and custom backgrounds do not work yet</li>
+    <li>Saturn: still to see which signal changes when it plays and pauses (the live debug card)</li>
+    <li>Switch 2 timing is set by Nintendo and cannot be sped up. A smart plug on the dock is the only quick way to know the console is on, and it cannot say which game</li>
+    <li>The Switch has no supported way to be turned on or off from Home Assistant, so its card has no power button. A smart plug on the dock would only cut the power outright</li>
+    <li>The PS5 power button needs the ps5-mqtt add-on, because the built-in PlayStation integration is read-only<small>It can wake the console and put it into rest mode, but not wake it from fully off</small></li>
+    <li>HDMI port: the TV reports no hdmi_input. Run the TV input debug script with the TV on each console to see whether ADB can read the active port<small>Until then, a PS5 and a Switch that are both on may be named wrongly</small></li>
+    <li>Thames Water: no integration found, and it is unknown whether your flat has a smart meter</li>
+    <li>homeassistant.local does not open on the work laptop, though the phone and iPad work; use the Pi's IP address there</li>
+    <li>The laptop that runs Logic is a work laptop that does not allow new USB devices or drives. Home Assistant is reachable from it in Safari (Chrome fails because of the always-on work VPN), so the Logic signal may be able to go straight to a webhook from the laptop. If it can’t run a listener, the fallback is the Focusrite's MIDI out and an ESP32 box, or a studio Mac mini</li>
+  </ul>
+</section>
+
+<h2 class="tier">Now</h2>
+<p class="tiernote">This week and month. Long-lead items and the foundation everything else needs.</p>
+
+<section class="phase">
+  <h2>1. This week</h2>
+  <p class="meta">No spend.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="a1"><span>Send the blind quote request to two or three UK blind makers<small>Reminder set to chase on Wednesday 14 October</small></span></label></li>
+    <li><label><input type="checkbox" data-id="a2"><span>Measure the three lounge windows and the office window<small>Width and drop, for the blind makers</small></span></label></li>
+    <li><label><input type="checkbox" data-id="a4"><span>Photograph the underfloor heating wiring centre and label which thermostat controls which zone<small>Show your dad</small></span></label></li>
+    <li><label><input type="checkbox" data-id="a5"><span>Check whether the oven is hardwired or plugs into a socket, and how the bathroom extractor fan is wired</span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>2. Foundation</h2>
+  <p class="meta">Hub, Zigbee radio, phone app and remote access.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="b4"><span>Set up Zigbee with the built-in ZHA integration<small>Use the ZBT-2's own USB cable and plug it into a USB 2.0 port, away from the USB 3 ports and any USB 3 devices</small></span></label></li>
+    <li><label><input type="checkbox" data-id="b5"><span>Subscribe to Home Assistant Cloud for remote access</span></label></li>
+    <li><label><input type="checkbox" data-id="b6"><span>Turn on automatic backups and copy one off the device</span></label></li>
+  </ul>
+  <div class="gate">Check: you can open the app on mobile data and see your dashboard.</div>
+</section>
+
+<h2 class="tier">Soon</h2>
+<p class="tiernote">Once the foundation works and the blinds are on their way.</p>
+
+<section class="phase">
+  <h2>3. Blinds</h2>
+  <p class="meta">Three custom lounge blinds and one office blind. Rechargeable motors, no mains.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="c1"><span>Order the four blinds with Somfy io rechargeable motors and buy a Somfy TaHoma Switch<small>Confirm with the maker the motor model, how it charges, and that it works with a TaHoma Switch</small></span></label></li>
+    <li><label><input type="checkbox" data-id="c2"><span>Set up the TaHoma Switch, turn on its local API, and add it to Home Assistant<small>Name each blind clearly, for example "Lounge left blind"</small></span></label></li>
+    <li><label><input type="checkbox" data-id="c3"><span>Create editable schedules in Home Assistant for opening and closing<small>So you can change times from the app</small></span></label></li>
+    <li><label><input type="checkbox" data-id="c4"><span>Automation: open at sunrise and close at sunset</span></label></li>
+    <li><label><input type="checkbox" data-id="c5"><span>Automation: blinds open gradually with your alarm</span></label></li>
+    <li><label><input type="checkbox" data-id="c6"><span>Automation: close the lounge blinds when the room is hot and the sun is high</span></label></li>
+    <li><label><input type="checkbox" data-id="c7"><span>Automation: close all blinds when everyone leaves</span></label></li>
+    <li><label><input type="checkbox" data-id="c8"><span>Low-battery alert for each motor<small>Ask the maker how often blinds this size need charging</small></span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>4. Underfloor heating</h2>
+  <p class="meta">Five zones. Goal: no thermostats on the walls.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="d1"><span>Your dad checks the system at the wiring centre<small>Make and model, whether the actuators are 230V or 24V, and where the floor temperature limits sit. Then decide between Heatmiser Neo wall thermostats (screens, keep working without Home Assistant, community integration) and hidden relays with sensors (nothing on the wall, fully local)</small></span></label></li>
+    <li><label><input type="checkbox" data-id="d2"><span>Your dad fits 5 Shelly Plus 1 dry-contact relays at the wiring centre, one per zone, and tidies the old thermostat cables<small>Same visit as the oven monitoring</small></span></label></li>
+    <li><label><input type="checkbox" data-id="d3"><span>Keep the floor temperature limit protection in circuit</span></label></li>
+    <li><label><input type="checkbox" data-id="d4"><span>Fit an Aqara temperature and humidity sensor in each zone<small>About 1.2m up, out of direct sun and out of sight</small></span></label></li>
+    <li><label><input type="checkbox" data-id="d5"><span>Create one Home Assistant thermostat per zone with a schedule<small>Underfloor heating is slow, so use gentle setbacks and heat up early</small></span></label></li>
+    <li><label><input type="checkbox" data-id="d6"><span>Write your heating script: start the zones at a set time when the outdoor temperature is below a threshold, and skip summer mornings<small>Uses the Met Office integration. Create a Met Office DataHub account, subscribe to the Site Specific Global Spot dataset (the free tier is enough), then add the Met Office integration in Home Assistant 2025.6 or later. The old DataPoint API was retired in December 2025, so older guides will not work</small></span></label></li>
+    <li><label><input type="checkbox" data-id="d7"><span>Leave a fallback at the wiring centre<small>Manual override or frost protection that works if Home Assistant is down</small></span></label></li>
+    <li><label><input type="checkbox" data-id="d8"><span>Remove the old wall thermostats once the zones have run properly for a few days</span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>5. Kitchen safety and left-on alerts</h2>
+  <p class="meta">Gas hob, fridge and freezer, oven, leaks.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="e1"><span>Ask the Gas Safe engineer to fit a smart gas shut-off valve with the new hob<small>It must be fitted by them and be certified for UK use</small></span></label></li>
+    <li><label><input type="checkbox" data-id="e2"><span>Fit an Aqara temperature sensor on the wall or hood above the hob, and an Aqara FP1E presence sensor in the kitchen</span></label></li>
+    <li><label><input type="checkbox" data-id="e3"><span>Automation: alert your phone if the hob temperature rises steadily with nobody in the kitchen for 10 minutes</span></label></li>
+    <li><label><input type="checkbox" data-id="e4"><span>Aqara door sensors on the fridge and the freezer<small>Alert after 3 minutes open</small></span></label></li>
+    <li><label><input type="checkbox" data-id="e5"><span>Aqara temperature sensor inside the freezer, alerting above -12°C</span></label></li>
+    <li><label><input type="checkbox" data-id="e6"><span>Shelly Plus Plug UK on the fridge freezer socket<small>Alerts you if it loses power while you are away</small></span></label></li>
+    <li><label><input type="checkbox" data-id="e7"><span>Your dad fits a Shelly EM Gen3 clamp on the oven circuit if the oven is hardwired<small>Alert on high draw for more than 2 hours</small></span></label></li>
+    <li><label><input type="checkbox" data-id="e8"><span>Three Aqara water leak sensors: under the sink, behind the washing machine, near the boiler</span></label></li>
+    <li><label><input type="checkbox" data-id="e9"><span>CO alarm in the kitchen and in any room with a boiler<small>Plus your normal smoke alarms</small></span></label></li>
+    <li><label><input type="checkbox" data-id="e10"><span>"Leaving the house" notification that lists anything still on<small>Hob heat, oven, open fridge or freezer door</small></span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>6. Ceiling spotlights</h2>
+  <p class="meta">About 55 spots across the flat, 12 in the lounge. The old bulb reads 12V, so they are GU5.3 (MR16), not GU10.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="s1"><span>Return the WiZ GU10 bulbs you bought for the spots<small>GU10 bulbs run on 230V mains and do not fit these fittings. The WiZ bulbs in the uplights and lamps are fine</small></span></label></li>
+    <li><label><input type="checkbox" data-id="s2"><span>Count the spots on each wall switch and note which switches are dimmers</span></label></li>
+    <li><label><input type="checkbox" data-id="s3"><span>Your dad checks the transformers and the switch boxes<small>One transformer per light or shared, whether they can dim LEDs, and whether there is a neutral wire at each switch</small></span></label></li>
+    <li><label><input type="checkbox" data-id="s4"><span>Replace the 35W halogens with dimmable LED GU5.3 bulbs, lounge first<small>They are a few pounds each and save a lot of electricity</small></span></label></li>
+    <li><label><input type="checkbox" data-id="s5"><span>Fit a Shelly Wi-Fi dimmer behind each switch so each room's spots become one smart light<small>Works with the Pi without the ZBT-2. Add the lounge spots to "all lounge lights"</small></span></label></li>
+    <li><label><input type="checkbox" data-id="s6"><span>Optional: test one Wi-Fi colour GU5.3 bulb in the lounge before buying any more<small>Colour mostly comes from the strips and lamps. Hue's MR16 works but is expensive</small></span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>7. Security</h2>
+  <p class="meta">Full security for a top-floor flat with a large terrace and a dog.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="f1"><span>Plan the cable routes for the terrace cameras and the doorbell<small>No decorating planned, so use surface trunking and one small drilled hole through the wall per device</small></span></label></li>
+    <li><label><input type="checkbox" data-id="f2"><span>Buy a PoE switch and Reolink 4K PoE cameras with pet detection<small>Check each model's spec for pet detection. Fit a microSD card in each for recording</small></span></label></li>
+    <li><label><input type="checkbox" data-id="f3"><span>Run Cat6 and fit the cameras, including one covering the terrace</span></label></li>
+    <li><label><input type="checkbox" data-id="f4"><span>Fit the Reolink PoE video doorbell</span></label></li>
+    <li><label><input type="checkbox" data-id="f5"><span>Add the cameras and doorbell to Home Assistant with the Reolink integration<small>Detections appear as sensors you can automate on</small></span></label></li>
+    <li><label><input type="checkbox" data-id="f6"><span>Block the cameras' internet access at the router once local streams work</span></label></li>
+    <li><label><input type="checkbox" data-id="f7"><span>Door and window sensors on every opening, and vibration sensors on the terrace doors</span></label></li>
+    <li><label><input type="checkbox" data-id="f8"><span>Smart lock: the front door locks itself when you leave<small>Use a retrofit lock that fits over your existing lock, and check your home insurance requirements first. Keep a physical key so you cannot lock yourself out</small></span></label></li>
+    <li><label><input type="checkbox" data-id="f9"><span>Away mode: random evening lights, blinds closed, and people alerts from the cameras when nobody is home</span></label></li>
+    <li><label><input type="checkbox" data-id="f10"><span>Terrace siren, armed away only: siren and flashing lights if a person is detected on the terrace, with a phone notification at the same time</span></label></li>
+    <li><label><input type="checkbox" data-id="f11"><span>Dog alerts: a notification when the dog is detected in the garden at night or at the door</span></label></li>
+    <li><label><input type="checkbox" data-id="f12"><span>Terrace dog safety: alert if the terrace door stays open for a long time, or if the terrace gets very hot or cold<small>Uses a door sensor and a temperature sensor on the terrace</small></span></label></li>
+    <li><label><input type="checkbox" data-id="f13"><span>Doorbell automations: phone notification with a snapshot, tap to view live video<small>Fire TV and touchscreen versions come later</small></span></label></li>
+    <li><label><input type="checkbox" data-id="f14"><span>Parcel alert: a phone alert when a parcel is left at your door<small>Uses package detection if the doorbell model supports it, otherwise motion at the door</small></span></label></li>
+  </ul>
+</section>
+
+<h2 class="tier">Later</h2>
+<p class="tiernote">The fun and comfort layer, once everything above is working.</p>
+
+<section class="phase">
+  <h2>8. Comfort and scenes</h2>
+  <p class="meta">Plugs with energy monitoring unlock a lot of these.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="g15"><span>Create Reading and Gaming scenes, and add them to the scene button grid</span></label></li>
+    <li><label><input type="checkbox" data-id="g16"><span>Extend Movie mode to Netflix (com.netflix.ninja) and other apps once you have their IDs</span></label></li>
+    <li><label><input type="checkbox" data-id="g18"><span>Gaming mode: start a Gaming scene when the PS5 starts playing, and return to normal when it stops<small>Uses the PS5 Now playing sensor</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g1"><span>Goodnight button: closes blinds, turns off lights, and warns you if a door is open or the hob is warm</span></label></li>
+    <li><label><input type="checkbox" data-id="g3"><span>Gaming and music scenes: lights and blinds set themselves when you start playing or turn the audio gear on<small>PS5 via the PlayStation Network integration. The Switch 2 has no official integration, so put an energy-monitoring plug on it and treat a rise in power draw as "in use". The same plug trick works for the audio gear</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g5"><span>Evening lighting: lights shift warmer and dimmer through the evening, and the uplight in your iron support comes on at night<small>The uplight needs a smart bulb or a smart plug depending on how it is fitted. Use matching bulbs in all the uplighters so they match</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g6"><span>Night path lights: dim lights at low brightness when you get up at night, using motion sensors and a time window after dark</span></label></li>
+    <li><label><input type="checkbox" data-id="g7"><span>Seasonal lighting: holiday and terrace lights on a sunset schedule<small>Use outdoor-rated smart plugs</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g8"><span>Bathroom extractor fan: switches on when humidity rises and off when it drops<small>Humidity sensor plus a relay on the fan. Your dad can check how the fan is wired</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g9"><span>Appliance finished alerts for the washing machine and dishwasher<small>Energy-monitoring plug on each, watching for power draw to drop</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g10"><span>Cheap-power appliances: run the dishwasher and washing machine in the cheapest Octopus slots<small>Needs an Octopus tariff with half-hourly prices such as Agile, and appliances that can start themselves. Check your models first</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g12"><span>Office air quality: a CO2 sensor that reminds you to open a window when the air gets stale<small>Choose a true CO2 sensor, not a VOC sensor</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g13"><span>Real wall buttons that dim and trigger scenes<small>Fit a Zigbee wall dimmer where each old switch was, and leave the light circuit permanently on so the smart bulbs stay powered. Hold to dim, press for scenes such as movie night. Your dad can blank off or lock the old switches on</small></span></label></li>
+    <li><label><input type="checkbox" data-id="g14"><span>Step lighting: the 10m Hue light strip tucked under the lounge step<small>Clean the wood with isopropyl alcohol and test the adhesive on a hidden spot. If the wood is oiled, waxed or rough, mount the strip in aluminium channels with a diffuser instead. Check how the kit handles corners before cutting or bending</small></span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>9. Screens and voice</h2>
+  <p class="meta">The wall touchscreen, the TV and your voice.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="h8"><span>Alexa: try the Fire TV remote for "turn on the uplights", then add Home Assistant Cloud if you want to say scene names out loud</span></label></li>
+    <li><label><input type="checkbox" data-id="h9"><span>Read the active HDMI port from the TV with the ADB input debug script, so the TV card can name the PS5 and the Switch exactly<small>Run it with the TV on each console's input, and note which port each is on</small></span></label></li>
+    <li><label><input type="checkbox" data-id="h10"><span>Add a PS5 power button: install the Mosquitto and ps5-mqtt add-ons, pair once with your PSN login, and turn on Stay Connected to the Internet and Enable Turning on PS5 from Network in the PS5's rest-mode settings<small>Then add the same top-right power button as the TV card, pointed at the new power switch</small></span></label></li>
+    <li><label><input type="checkbox" data-id="h4"><span>Doorbell automations: show the snapshot over whatever is playing on the Fire TV, and a live feed pop-up on the wall touchscreen<small>Fire TV uses the Notifications for Android TV and Fire TV integration. The touchscreen pop-up uses the Browser Mod add-on</small></span></label></li>
+    <li><label><input type="checkbox" data-id="h5"><span>"Show the terrace": the terrace camera appears on the TV on demand<small>Confirm the best method for your Fire TV model when you get here</small></span></label></li>
+    <li><label><input type="checkbox" data-id="h6"><span>Daily briefing on the wall screen: weather, bin day, your calendar and the dog's feeding schedule<small>Bin day comes from your council's integration if one exists, otherwise a manual schedule. Feeding gets a "fed" button that resets each day and nudges your phone if it has not been pressed by feeding time</small></span></label></li>
+    <li><label><input type="checkbox" data-id="h7"><span>Voice assistant: say "close the lounge blinds" out loud using Home Assistant's own voice speaker<small>With Home Assistant Cloud, speech processing runs in the cloud. Fully local speech processing may need a more powerful machine than the Pi</small></span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>10. Custom scripting and low priority</h2>
+  <p class="meta">Where you write your own things, plus nice-to-haves.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="i1"><span>Install Pyscript so you can write automations in Python alongside YAML</span></label></li>
+    <li><label><input type="checkbox" data-id="i2"><span>Keep the scripts in a private git repository, organised by room or purpose, with clear names and comments<small>So they stay maintainable. We write them together when you reach this stage</small></span></label></li>
+    <li><label><input type="checkbox" data-id="i3"><span>Damp and mould alerts (low priority)<small>The humidity readings from the heating zone sensors can warn you when a room stays humid, so no extra hardware is needed to start</small></span></label></li>
+    <li><label><input type="checkbox" data-id="i4"><span>Cleaner access (low priority)<small>A temporary code on the smart lock, with a notification when they arrive and leave, if your lock supports codes</small></span></label></li>
+    <li><label><input type="checkbox" data-id="i5"><span>BBQ or oven probe alerts (low priority)<small>A phone ping when food hits temperature, using the kit you already own</small></span></label></li>
+    <li><label><input type="checkbox" data-id="i6"><span>Tidy up debug leftovers<small>Delete the Markdown test cards (Switch, artwork, TV state), the RAWG test, PS5 cover test and TV input debug scripts once you are finished with them</small></span></label></li>
+    <li><label><input type="checkbox" data-id="i7"><span>Trim the lounge lights card with one small sensor that works out the last scene pressed, so the buttons read it instead of each repeating the same code<small>Adding a new scene then becomes a one-line change</small></span></label></li>
+    <li><label><input type="checkbox" data-id="i8"><span>Optional: a custom device-picker popup for the Spotify card, with one round button per speaker<small>Needs Browser Mod from HACS</small></span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>11. Cars and reminders</h2>
+  <p class="meta">A garage card for the grey Audi A5 and the white 1965 Mustang, in the same style as the other cards, with tax and MOT counted down for you.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="j1"><span>Request a DVLA Vehicle Enquiry API key<small>This is the slow part, usually a day or two. It is free and gives the tax and MOT status and dates from a registration plate, but not insurance or service history</small></span></label></li>
+    <li><label><input type="checkbox" data-id="j2"><span>Put the two plates in secrets.yaml and build the lookup: a sensor that checks once or twice a day, plus sensors that count the days left to tax and MOT<small>Keep the plates out of chats and out of any git repository</small></span></label></li>
+    <li><label><input type="checkbox" data-id="j3"><span>Garage card in the glass style: one panel per car with a picture, tax and MOT days left (green, amber under 30 days, red under 7 or expired), and the insurance renewal date</span></label></li>
+    <li><label><input type="checkbox" data-id="j4"><span>Phone reminders at 30, 14, 7 and 1 days before tax, MOT and insurance, with a Done button like the dog feeding ones</span></label></li>
+    <li><label><input type="checkbox" data-id="j5"><span>Insurance renewal and service dates as dates you enter yourself on the dashboard<small>Nothing can read these automatically, so you type them in once a year. A reminder based on mileage works the same way</small></span></label></li>
+    <li><label><input type="checkbox" data-id="j6"><span>Car pictures: use your own photo with the background cut out (a transparent PNG kept in the www/cars folder), or have a side-view illustration drawn for each car<small>Your own photo looks the most real. Stock photos and manufacturer renders are copyrighted, so those are not an option</small></span></label></li>
+    <li><label><input type="checkbox" data-id="j7"><span>Check how the Mustang appears to the DVLA before designing its panel<small>A car this old may be exempt from the MOT and from road tax, though a free tax renewal can still be needed each year, and the lookup only works for UK-registered cars</small></span></label></li>
+  </ul>
+</section>
+
+<section class="phase">
+  <h2>12. Office studio</h2>
+  <p class="meta">Power control for the studio gear first, then a Logic recording signal and a Studio card, built up gradually.</p>
+  <ul class="tasks">
+    <li><label><input type="checkbox" data-id="k1"><span>Buy the Tapo P304M strip and add it with the TP-Link Smart Home integration, not Matter, so the energy readings come through<small>Home Assistant asks for your TP-Link login once. Give it a fixed IP address in the router, use the 2.4GHz Wi-Fi band, and turn off automatic firmware updates once it works</small></span></label></li>
+    <li><label><input type="checkbox" data-id="k2"><span>Rename its four switches (Studio speakers, Amp 1, Amp 2, OX box) and set "after a power cut" to off in the Tapo app<small>Each socket also has its own push button and light, which work with no internet, Wi-Fi or Home Assistant</small></span></label></li>
+    <li><label><input type="checkbox" data-id="k3"><span>Start with the two speakers: both on one socket through a small two-way extension, their own power switches left on, and a Studio speakers button on the dashboard</span></label></li>
+    <li><label><input type="checkbox" data-id="k4"><span>Before adding the amps, check the two amps: models, wattage and whether either is a valve amp<small>Keep the strip's total load under 13A, ideally under 10A, and never plug one strip into another. A valve amp should come up with its standby switch left off for about a minute, so it may need a manual step. Check the OX box manual to see whether cutting its power is fine</small></span></label></li>
+    <li><label><input type="checkbox" data-id="k5"><span>Studio on and Studio off sequences with short delays: on is the OX box, then the amps, then the speakers last, and off is the reverse<small>Powering the speakers last avoids the thump through the monitors</small></span></label></li>
+    <li><label><input type="checkbox" data-id="k6"><span>Studio rack card in the glass style: one chip per device showing off, on or in use, with live watts, plus an alert if the gear is still drawing power long after you have finished<small>Needs the energy readings to come through per socket, so check that first</small></span></label></li>
+    <li><label><input type="checkbox" data-id="k10"><span>Try the laptop route for the Logic recording signal first (Home Assistant is reachable from the work laptop in Safari): create a Logic status dropdown helper (idle, armed, recording) and a webhook automation, turn on the IAC Driver in Audio MIDI Setup, add Logic’s Recording Light control surface on that port, then find out what Terminal allows for a small MIDI listener that posts to the webhook<small>Use the Pi’s IP address in the webhook URL, not homeassistant.local, because the work VPN breaks .local names outside Safari. Test the webhook first with curl from any computer on the network. If scripts or tools can’t run on the laptop, use the ESP32 route below</small></span></label></li>
+    <li><label><input type="checkbox" data-id="k7"><span>Fallback if the laptop route does not work: Logic recording signal without the work laptop's network: Logic's built-in Recording Light sends a MIDI note when a track is armed and another when recording, out of the Focusrite's MIDI socket, down a 5-pin cable to an ESP32 on the home Wi-Fi running ESPHome<small>Logic armed and Logic recording then appear as sensors. Nothing is installed on the laptop and no new USB devices are needed. Check first that the interface in use has the MIDI sockets (the 18i20 4th Gen does)</small></span></label></li>
+    <li><label><input type="checkbox" data-id="k8"><span>If you buy a Mac mini for the studio, send the same signal through macOS's virtual MIDI port to a small listener script and a Home Assistant webhook, and skip the ESP32 box<small>The script and the automation are already drafted</small></span></label></li>
+    <li><label><input type="checkbox" data-id="k9"><span>Studio card and recording mode: ARMED or RECORDING with a timer, tempo, project name, armed tracks turned into icons from keywords in their names (VOX, GTR, DRUMS), and input level bars from the interface. Recording mode pauses the TV and music, mutes the doorbell chime and turns the lounge lights off<small>Logic shares limited state, so it cannot report plug-ins or track types. Most of the extras need the Mac mini</small></span></label></li>
+  </ul>
+</section>
+
+<h3>Automations and scripting</h3>
+<p>Every automation is a trigger, some conditions and actions. Build it in the visual editor, then switch to YAML whenever you want full control. Example: heat the kitchen floor zone at 5am, but only if it is cold outside.</p>
+<pre style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;font-size:.85rem;line-height:1.45;margin:0 0 14px"><code>triggers:
+  - trigger: time
+    at: "05:00:00"
+conditions:
+  - condition: numeric_state
+    entity_id: sensor.outdoor_temperature
+    below: 8
+actions:
+  - action: climate.set_temperature
+    target:
+      entity_id: climate.kitchen_floor
+    data:
+      temperature: 21</code></pre>
+<ul class="rules">
+  <li>Underfloor heating is slow, so a better version starts earlier the colder it is, using a template that calculates the start time.</li>
+  <li>Beyond the visual editor: YAML with templates, Node-RED for visual flows, and Pyscript for Python.</li>
+</ul>
+
+<h3>Still to confirm</h3>
+<ul class="decide">
+  <li>Blind maker, motor model and how it charges, from the quotes.</li>
+  <li>Wiring centre make and actuator voltage, from your dad.</li>
+  <li>Whether the oven is hardwired or plugs into a socket.</li>
+  <li>Whether your dishwasher and washing machine can start themselves.</li>
+  <li>Which A5 body style (coupé or Sportback) and shade of grey, and whether the Mustang is registered in the UK, so the pictures and the lookup match.</li>
+  <li>What the two amps are (models, wattage, valve or not), and which Scarlett model the work laptop uses, to be sure it has the 5-pin MIDI out.</li>
+  <li>Which heating thermostat route to take: hidden relays and sensors, or ProWarm ProTouch iQ touchscreens (buy one to test with Home Assistant first, using the 30-day return).</li>
+  <li>Whether the three Tapo L900-5 strips stay reliable over the next weeks. Keep firmware auto-update off.</li>
+  <li>Whether NordVPN being switched on blocks Home Assistant's connection to the Fire TV. It has worked so far; check if it drops.</li>
+  <li>Whether the 12V spot transformers can dim LEDs, from your dad.</li>
+</ul>
+
+<h3>Rules</h3>
+<ul class="rules">
+  <li>Choose Zigbee devices with local control; avoid cloud-only brands.</li>
+  <li>Every automation needs a manual override that works without the app.</li>
+  <li>Mains wiring changes (relays, clamps, oven circuit) go to your dad. Gas work goes to a Gas Safe engineer.</li>
+</ul>
+
+<button class="reset" id="reset" type="button">Clear all ticks</button>
+<footer>Prices are rough UK estimates and will vary.</footer>
+
+</div>
+<script>
+(function () {
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('input[data-id]'));
+  var fill = document.getElementById('fill');
+  var count = document.getElementById('count');
+  function get(k) { try { return localStorage.getItem('shplan2:' + k); } catch (e) { return null; } }
+  function set(k, v) { try { if (v) localStorage.setItem('shplan2:' + k, '1'); else localStorage.removeItem('shplan2:' + k); } catch (e) {} }
+  function update() {
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    fill.style.width = (boxes.length ? done / boxes.length * 100 : 0) + '%';
+    count.textContent = done + ' of ' + boxes.length + ' done';
+  }
+  boxes.forEach(function (b) {
+    b.checked = get(b.dataset.id) === '1';
+    b.addEventListener('change', function () { set(b.dataset.id, b.checked); update(); });
+  });
+  document.getElementById('reset').addEventListener('click', function () {
+    boxes.forEach(function (b) { b.checked = false; set(b.dataset.id, false); });
+    update();
+  });
+  update();
+})();
+</script>
+</body>
+</html>

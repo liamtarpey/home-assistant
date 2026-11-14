@@ -1,0 +1,102 @@
+tfl_base:
+  show_name: false
+  show_icon: false
+  tap_action:
+    action: none
+  variables:
+    lines: |
+      [[[
+        return [
+          {k: 'bakerloo', n: 'Bakerloo', c: '#B36305', e: 'sensor.london_underground_bakerloo', i: 'bakerloo'},
+          {k: 'central', n: 'Central', c: '#E32017', e: 'sensor.london_underground_central', i: 'central'},
+          {k: 'circle', n: 'Circle', c: '#FFD300', e: 'sensor.london_underground_circle', i: 'circle'},
+          {k: 'district', n: 'District', c: '#00782A', e: 'sensor.london_underground_district', i: 'district'},
+          {k: 'dlr', n: 'DLR', c: '#00A4A7', e: 'sensor.london_underground_dlr', i: 'dlr'},
+          {k: 'elizabeth', n: 'Elizabeth line', c: '#6950A1', e: 'sensor.london_underground_elizabeth_line', i: 'elizabeth'},
+          {k: 'hammersmith', n: 'Hammersmith & City', c: '#F3A9BB', e: 'sensor.london_underground_hammersmith_city', i: 'hammersmith-city'},
+          {k: 'jubilee', n: 'Jubilee', c: '#A0A5A9', e: 'sensor.london_underground_jubilee', i: 'jubilee'},
+          {k: 'metropolitan', n: 'Metropolitan', c: '#9B0056', e: 'sensor.london_underground_metropolitan', i: 'metropolitan'},
+          {k: 'northern', n: 'Northern', c: '#8A8F98', e: 'sensor.london_underground_northern', i: 'northern'},
+          {k: 'piccadilly', n: 'Piccadilly', c: '#2F66CC', e: 'sensor.london_underground_piccadilly', i: 'piccadilly'},
+          {k: 'victoria', n: 'Victoria', c: '#0098D4', e: 'sensor.london_underground_victoria', i: 'victoria'},
+          {k: 'waterloo', n: 'Waterloo & City', c: '#95CDBA', e: 'sensor.london_underground_waterloo_city', i: 'waterloo-city'},
+          {k: 'tram', n: 'Tram', c: '#84B817', e: 'sensor.london_underground_tram', i: 'tram'}
+        ];
+      ]]]
+  styles:
+    card:
+      - background: rgb(18,20,26)
+      - border: none
+      - border-radius: 18px
+      - box-shadow: none
+      - padding: 0
+      - overflow: hidden
+      - height: auto
+      - cursor: default
+    grid:
+      - grid-template-areas: '"body"'
+      - grid-template-columns: minmax(0, 1fr)
+    custom_fields:
+      body:
+        - justify-self: stretch
+        - min-width: 0
+  extra_styles: |
+    .tf { position: relative; box-sizing: border-box; padding: 18px 22px 22px; min-height: 210px; display: flex; flex-direction: column; color: #ffffff; font-family: Roboto, system-ui, sans-serif; text-align: left; }
+    .tf-glow { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+    .tf-head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
+    .tf-ttl { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .tf-upd { display: flex; align-items: center; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.7); white-space: nowrap; }
+    .tf-dw { position: relative; display: inline-block; width: 8px; height: 8px; margin-right: 7px; flex: none; }
+    .tf-dr, .tf-dc { position: absolute; top: 0; left: 0; width: 8px; height: 8px; border-radius: 50%; box-sizing: border-box; }
+    .tf-dr { border: 2px solid #3ddc84; animation: tf-ring 6s ease-out infinite; }
+    .tf-dc { background: #3ddc84; box-shadow: 0 0 8px rgba(61,220,132,0.9); animation: tf-beat 6s ease-in-out infinite; }
+    .tf-big { position: relative; margin-top: 24px; font-size: 40px; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tf-chips { position: relative; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .tf-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 18px; background: rgba(255,255,255,0.12); font-size: 13px; font-weight: 500; white-space: nowrap; }
+    .tf-chip img { width: 22px; height: 22px; }
+    .tf-ribw { position: relative; margin-top: auto; padding-top: 22px; }
+    .tf-rib { position: relative; display: flex; gap: 4px; height: 6px; border-radius: 3px; overflow: hidden; }
+    .tf-seg { flex: 1; border-radius: 3px; opacity: 0.9; }
+    .tf-seg.bad { animation: tf-segp 2.4s ease-in-out infinite; }
+    .tf-rib::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 26%; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.55), rgba(255,255,255,0)); animation: tf-sweep 6s ease-in-out infinite; }
+    .tf-dl { position: relative; display: flex; align-items: center; gap: 14px; height: 64px; margin-top: 12px; }
+    .tf-dl img { width: 36px; height: 36px; flex: none; }
+    .tf-dm { flex: 1; min-width: 0; }
+    .tf-dn { font-size: 16px; font-weight: 700; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tf-tk { position: relative; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.16); }
+    .tf-tf { position: absolute; top: 0; left: 0; bottom: 0; border-radius: 2px; background: linear-gradient(90deg, rgba(0,164,167,0.15), #00A4A7); }
+    .tf-td { position: absolute; top: -4px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 10px rgba(0,164,167,1); animation: tf-tdp 2.4s ease-in-out infinite; }
+    .tf-mins { display: flex; align-items: baseline; gap: 5px; width: 92px; justify-content: flex-end; }
+    .tf-mins b { font-size: 38px; font-weight: 700; line-height: 1; }
+    .tf-mins span { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+    .tf-hr { position: relative; display: flex; align-items: center; gap: 12px; padding-right: 58px; min-height: 46px; }
+    .tf-hr img { width: 36px; height: 36px; flex: none; }
+    .tf-abg { position: absolute; top: -2px; right: -2px; width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center; animation: tf-alertp 2.6s ease-in-out infinite; }
+    .tf-st { position: relative; margin-top: 12px; font-size: 28px; font-weight: 700; line-height: 1.1; }
+    .tf-ds { position: relative; margin-top: 10px; font-size: 14px; line-height: 1.45; color: rgba(255,255,255,0.84); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    .tf-grid { position: relative; margin-top: 8px; display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 46px); grid-template-columns: 1fr 1fr; gap: 4px 28px; }
+    .tf-li { display: flex; align-items: center; gap: 12px; height: 46px; padding: 0 12px; border-radius: 12px; box-sizing: border-box; min-width: 0; }
+    .tf-li img { width: 30px; height: 30px; flex: none; }
+    .tf-li.bad { background: rgba(255,176,32,0.12); }
+    .tf-li.sev { background: rgba(255,90,77,0.14); }
+    .tf-ln { font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .tf-gs { margin-left: auto; display: flex; align-items: center; gap: 7px; font-size: 13px; color: rgba(255,255,255,0.66); white-space: nowrap; }
+    .tf-gs i { width: 7px; height: 7px; border-radius: 50%; background: #3ddc84; flex: none; }
+    .tf-bs { margin-left: auto; display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+    .tf-bs i { width: 8px; height: 8px; border-radius: 50%; flex: none; animation: tf-segp 2.4s ease-in-out infinite; }
+    .tf-okc { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: rgba(61,220,132,0.16); color: #3ddc84; flex: none; animation: tf-okp 3.2s ease-in-out infinite; }
+    .tf-okt { font-size: 28px; font-weight: 700; line-height: 1.1; }
+    .tf-oks { margin-top: 6px; font-size: 14px; color: rgba(255,255,255,0.7); }
+    .tf-okr { position: relative; display: flex; align-items: center; gap: 18px; margin-top: 22px; }
+    @media (max-width: 620px) {
+      .tf-grid { grid-auto-flow: row; grid-template-rows: none; grid-template-columns: 1fr; }
+      .tf-big { font-size: 30px; }
+    }
+    @keyframes tf-ring { 0% { transform: scale(1); opacity: 0.75; } 16% { transform: scale(3); opacity: 0; } 100% { transform: scale(3); opacity: 0; } }
+    @keyframes tf-beat { 0%, 100% { transform: scale(1); } 6% { transform: scale(1.25); } 14% { transform: scale(1); } }
+    @keyframes tf-segp { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+    @keyframes tf-sweep { from { transform: translateX(-120%); } to { transform: translateX(380%); } }
+    @keyframes tf-tdp { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.35); } }
+    @keyframes tf-alertp { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,176,32,0.45); } 50% { box-shadow: 0 0 0 9px rgba(255,176,32,0); } }
+    @keyframes tf-okp { 0%, 100% { box-shadow: 0 0 0 0 rgba(61,220,132,0.4); } 50% { box-shadow: 0 0 0 12px rgba(61,220,132,0); } }
+

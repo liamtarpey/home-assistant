@@ -1,0 +1,34 @@
+lt_tile:
+  show_name: false
+  show_icon: false
+  tap_action:
+    action: toggle
+  hold_action:
+    action: more-info
+  styles:
+    card:
+      - height: 96px
+      - padding: 0
+      - border: none
+      - border-radius: 16px
+      - box-shadow: none
+      - overflow: hidden
+      - background: |
+          [[[
+            if (!entity || entity.state !== 'on') return 'rgba(255,255,255,0.06)';
+            const c = (entity.attributes && Array.isArray(entity.attributes.rgb_color)) ? entity.attributes.rgb_color : [255, 200, 140];
+            return `rgba(${c[0]},${c[1]},${c[2]},0.18)`;
+          ]]]
+  custom_fields:
+    body: |
+      [[[
+        const IC = variables.icons;
+        const ico = (kind, size, col) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" fill="${col}">${IC[kind] || IC.lamp}</svg>`;
+        const rgbOf = (en) => (en && en.attributes && Array.isArray(en.attributes.rgb_color)) ? en.attributes.rgb_color : [255, 200, 140];
+        const pctOf = (en) => Math.round(((en && en.attributes && en.attributes.brightness) || 0) / 255 * 100);
+        const on = entity && entity.state === 'on';
+        const kind = variables.kind;
+        if (!on) return `<div class="lt-tile"><div class="lt-ic" style="background:rgba(255,255,255,0.1)">${ico(kind, 20, 'rgba(255,255,255,0.55)')}</div><div class="lt-nm" style="color:rgba(255,255,255,0.8)">${variables.name}</div><div class="lt-st">Off</div></div>`;
+        const c = rgbOf(entity).slice(0, 3).join(',');
+        return `<div class="lt-tile"><div class="lt-glow" style="background:radial-gradient(circle at 88% 0%, rgba(${c},0.3) 0%, rgba(${c},0) 62%)"></div><i class="lt-gd" style="background:rgb(${c});box-shadow:0 0 10px rgb(${c})"></i><div class="lt-ic" style="background:rgba(${c},0.22)">${ico(kind, 20, 'rgb(' + c + ')')}</div><div class="lt-nm">${variables.name}</div><div class="lt-st">${pctOf(entity)}%</div></div>`;
+      ]]]

@@ -1,0 +1,120 @@
+# Automations built in this project. Paste each one separately in Settings > Automations > Edit in YAML.
+
+# 1) Movie mode when Prime Video or YouTube plays after dark, only if the lounge lights are all off
+- alias: Movie mode with Prime Video and YouTube
+  triggers:
+    - trigger: template
+      id: start
+      value_template: >
+        {{ state_attr('media_player.fire_tv_192_168_1_110', 'app_id') in
+        ['com.amazon.firebat', 'com.amazon.firetv.youtube'] }}
+      for: '00:00:05'
+    - trigger: state
+      id: sunset
+      entity_id: sun.sun
+      to: below_horizon
+    - trigger: state
+      id: tv_off
+      entity_id: media_player.fire_tv_192_168_1_110
+      to:
+        - 'off'
+        - standby
+      for: '00:00:30'
+  actions:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id:
+                - start
+                - sunset
+            - condition: state
+              entity_id: sun.sun
+              state: below_horizon
+            - condition: state
+              entity_id: light.all_lounge_lights
+              state: 'off'
+            - condition: template
+              value_template: >
+                {{ state_attr('media_player.fire_tv_192_168_1_110', 'app_id') in
+                ['com.amazon.firebat', 'com.amazon.firetv.youtube'] }}
+          sequence:
+            - action: scene.turn_on
+              target:
+                entity_id: scene.movie_mode
+            - action: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.movie_mode_active
+        - conditions:
+            - condition: trigger
+              id: tv_off
+            - condition: state
+              entity_id: input_boolean.movie_mode_active
+              state: 'on'
+          sequence:
+            - action: scene.turn_on
+              target:
+                entity_id: scene.sleep_mode
+            - action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.movie_mode_active
+  mode: single
+
+# 2) Zelda lights when a Zelda game is being played on the Switch 2 (scene.green_bright is the Zelda scene)
+- alias: Zelda lights when playing Zelda on Switch 2
+  mode: single
+  triggers:
+    - trigger: template
+      value_template: >
+        {{ is_state('binary_sensor.switch_2_active', 'on')
+           and 'zelda' in states('sensor.switch_2_last_game') | lower }}
+      for:
+        seconds: 20
+  actions:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.green_bright
+
+# 3) Studio power safety alert (Tapo P304M overheat or overload sensors). Replace the notify service name.
+- alias: Studio power safety alert
+  mode: queued
+  triggers:
+    - trigger: state
+      entity_id:
+        - binary_sensor.office_power_evh_5150iii_overheated
+        - binary_sensor.office_power_evh_5150iii_overloaded
+        - binary_sensor.office_power_little_walter_22w_overheated
+        - binary_sensor.office_power_little_walter_22w_overloaded
+        - binary_sensor.office_power_yamaha_msp5_left_overheated
+        - binary_sensor.office_power_yamaha_msp5_left_overloaded
+        - binary_sensor.office_power_yamaha_msp5_right_overheated
+        - binary_sensor.office_power_yamaha_msp5_right_overloaded
+      to: 'on'
+  actions:
+    - action: persistent_notification.create
+      data:
+        title: Studio power warning
+        message: "{{ trigger.to_state.name }}: reported by the power strip. Check the equipment before using it."
+    - action: notify.mobile_app_YOUR_PHONE
+      continue_on_error: true
+      data:
+        title: Studio power warning
+        message: "{{ trigger.to_state.name }}: reported by the power strip. Check the equipment before using it."
+
+# 4) Logic recording signal: raw MIDI messages from the studio laptop become events (webhook id is a placeholder)
+- alias: Logic MIDI listener (raw)
+  mode: queued
+  triggers:
+    - trigger: webhook
+      webhook_id: REPLACE_WITH_A_LONG_RANDOM_STRING
+      allowed_methods:
+        - POST
+      local_only: true
+  actions:
+    - event: studio_logic_midi
+      event_data:
+        type: "{{ trigger.json.type | default('') }}"
+        note: "{{ trigger.json.note | default(none) }}"
+        velocity: "{{ trigger.json.velocity | default(none) }}"
+        control: "{{ trigger.json.control | default(none) }}"
+        value: "{{ trigger.json.value | default(none) }}"
+        channel: "{{ trigger.json.channel | default(none) }}"

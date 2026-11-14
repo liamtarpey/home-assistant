@@ -1,0 +1,1 @@
+lt_sw_pink: {show_name: false, show_icon: false, tap_action: {action: perform-action, perform_action: light.turn_on, target: {entity_id: "[[[ return variables.e; ]]]"}, data: {rgb_color: [255, 105, 180]}}, styles: {card: [{width: 30px}, {height: 30px}, {padding: 0}, {border-radius: 50%}, {border: '2px solid rgba(255,255,255,0.18)'}, {box-shadow: none}, {background: '#ff69b4'}]}}

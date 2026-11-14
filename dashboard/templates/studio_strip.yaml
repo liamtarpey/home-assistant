@@ -1,0 +1,57 @@
+studio_strip:
+  show_name: false
+  show_icon: false
+  tap_action:
+    action: none
+  triggers_update: [switch.office_studio_power_speakers_and_amps_yahama_msp5_left, switch.office_studio_power_speakers_and_amps_yamaha_msp5_right, switch.office_studio_power_speakers_and_amps_evh_5150iii, switch.office_studio_power_speakers_and_amps_little_walter_22w, sensor.office_power_yamaha_msp5_left_current_consumption, sensor.office_power_yamaha_msp5_right_current_consumption, sensor.office_power_evh_5150iii_current_consumption, sensor.office_power_little_walter_22w_current_consumption, sensor.office_power_yamaha_msp5_left_voltage, sensor.office_power_yamaha_msp5_right_voltage, sensor.office_power_evh_5150iii_voltage, sensor.office_power_little_walter_22w_voltage]
+  styles:
+    card:
+      - background: rgb(18,20,26)
+      - border: none
+      - border-radius: 18px
+      - box-shadow: none
+      - padding: 0
+      - overflow: hidden
+      - height: 250px
+      - cursor: default
+    grid:
+      - grid-template-areas: '"head" "r1" "r2" "r3" "r4"'
+      - grid-template-columns: minmax(0, 1fr)
+      - grid-template-rows: min-content min-content min-content min-content min-content
+      - row-gap: 6px
+      - align-content: start
+    custom_fields:
+      head:
+        - justify-self: stretch
+        - min-width: 0
+        - margin: 18px 22px 6px 22px
+      r1:
+        - justify-self: stretch
+        - min-width: 0
+        - margin: 0 14px
+      r2:
+        - justify-self: stretch
+        - min-width: 0
+        - margin: 0 14px
+      r3:
+        - justify-self: stretch
+        - min-width: 0
+        - margin: 0 14px
+      r4:
+        - justify-self: stretch
+        - min-width: 0
+        - margin: 0 14px
+  custom_fields:
+    head: |
+      [[[
+        const S = ['sensor.office_power_yamaha_msp5_left_current_consumption', 'sensor.office_power_yamaha_msp5_right_current_consumption', 'sensor.office_power_evh_5150iii_current_consumption', 'sensor.office_power_little_walter_22w_current_consumption'];
+        const n = (id) => { const v = parseFloat(states[id] ? states[id].state : ''); return isNaN(v) ? null : v; };
+        const on = ['switch.office_studio_power_speakers_and_amps_yahama_msp5_left', 'switch.office_studio_power_speakers_and_amps_yamaha_msp5_right', 'switch.office_studio_power_speakers_and_amps_evh_5150iii', 'switch.office_studio_power_speakers_and_amps_little_walter_22w'].map(id => states[id] && states[id].state === 'on');
+        const w = S.map((id, i) => on[i] ? n(id) : null);
+        const has = w.some(x => x !== null);
+        const total = w.reduce((a, x) => a + (x || 0), 0);
+        const volts = ['sensor.office_power_evh_5150iii_voltage', 'sensor.office_power_little_walter_22w_voltage', 'sensor.office_power_yamaha_msp5_left_voltage', 'sensor.office_power_yamaha_msp5_right_voltage'].map(n).filter(x => x !== null);
+        const v = volts.length ? Math.round(volts.reduce((a, x) => a + x, 0) / volts.length) : null;
+        const right = [v !== null ? `<span style="color:rgba(255,255,255,0.7)">${v} V</span>` : '', has ? `<span style="font-weight:600;color:#ffb347">${Math.round(total)} W</span>` : ''].filter(Boolean).join('<span style="opacity:0.4">  ·  </span>');
+        return `<div style="display:flex;align-items:center;justify-content:space-between;color:#ffffff;font-family:Roboto,system-ui,sans-serif;font-size:13px"><span style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7)">Power strip</span><span>${right}</span></div>`;
+      ]]]

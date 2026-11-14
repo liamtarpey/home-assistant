@@ -1,0 +1,43 @@
+# Utilities view card (view type: Panel)
+grid_options:
+  columns: full
+type: custom:button-card
+template: page_shell
+styles:
+  grid:
+    - grid-template-areas: '"hero hero side" "a b c"'
+custom_fields:
+  hero:
+    card:
+      type: custom:button-card
+      template:
+        - ut_base
+        - ut_hero
+  side:
+    card:
+      type: custom:button-card
+      template:
+        - ut_base
+        - ut_tariff
+  a:
+    card:
+      type: custom:button-card
+      template:
+        - ut_base
+        - ut_energy
+      variables:
+        kind: elec
+  b:
+    card:
+      type: custom:button-card
+      template:
+        - ut_base
+        - ut_energy
+      variables:
+        kind: gas
+  c:
+    card:
+      type: custom:button-card
+      template:
+        - ut_base
+        - ut_water

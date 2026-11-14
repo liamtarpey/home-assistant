@@ -1,0 +1,56 @@
+studio_row:
+  show_name: false
+  show_icon: false
+  tap_action:
+    action: toggle
+  triggers_update: [sensor.office_power_yamaha_msp5_left_current_consumption, sensor.office_power_yamaha_msp5_right_current_consumption, sensor.office_power_evh_5150iii_current_consumption, sensor.office_power_little_walter_22w_current_consumption, sensor.office_power_yamaha_msp5_left_today_s_consumption, sensor.office_power_yamaha_msp5_right_today_s_consumption, sensor.office_power_evh_5150iii_today_s_consumption, sensor.office_power_little_walter_22w_today_s_consumption, binary_sensor.office_power_yamaha_msp5_left_overheated, binary_sensor.office_power_yamaha_msp5_left_overloaded, binary_sensor.office_power_yamaha_msp5_right_overheated, binary_sensor.office_power_yamaha_msp5_right_overloaded, binary_sensor.office_power_evh_5150iii_overheated, binary_sensor.office_power_evh_5150iii_overloaded, binary_sensor.office_power_little_walter_22w_overheated, binary_sensor.office_power_little_walter_22w_overloaded]
+  styles:
+    card:
+      - background: none
+      - border: none
+      - border-radius: 12px
+      - box-shadow: none
+      - padding: 0
+      - overflow: hidden
+      - height: 40px
+      - cursor: pointer
+    grid:
+      - grid-template-areas: '"body"'
+      - grid-template-columns: minmax(0, 1fr)
+    custom_fields:
+      body:
+        - justify-self: stretch
+        - align-self: stretch
+        - width: 100%
+        - min-width: 0
+  extra_styles: |
+    .sr { display: flex; align-items: center; gap: 12px; width: 100%; height: 40px; box-sizing: border-box; padding: 0 12px; border-radius: 12px; background: rgba(255,255,255,0.06); color: #ffffff; font-family: Roboto, system-ui, sans-serif; text-align: left; }
+    .sr.gone { background: none; border: 1.5px dashed rgba(255,255,255,0.14); color: rgba(255,255,255,0.5); }
+    .sr-i { display: flex; flex: none; }
+    .sr-t { min-width: 0; }
+    .sr-n { font-size: 14px; font-weight: 700; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sr-s { margin-top: 2px; font-size: 11px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sr-tg { position: relative; margin-left: auto; width: 42px; height: 24px; border-radius: 12px; flex: none; }
+    .sr-tg i { position: absolute; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+    .sr.alarm { background: rgba(255,90,77,0.18); box-shadow: inset 0 0 0 1.5px rgba(255,90,77,0.6); }
+    .sr-s .al { color: #ff8a80; font-weight: 700; }
+  custom_fields:
+    body: |
+      [[[
+        const st = entity ? entity.state : undefined;
+        const reach = !!st && !['unavailable', 'unknown'].includes(st);
+        const on = st === 'on';
+        const c = variables.color || '#ffffff';
+        const num = (id) => { const v = parseFloat(states[id] ? states[id].state : ''); return isNaN(v) ? null : v; };
+        const w = on ? num(variables.pw) : null;
+        const kwh = num(variables.kwh);
+        const plug = '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5M15 3v5"/><path d="M6 8h12v3a6 6 0 0 1-12 0z"/><path d="M12 17v4"/></svg>';
+        const tg = on ? `<span class="sr-tg" style="background:${c}"><i style="right:3px"></i></span>` : `<span class="sr-tg" style="background:rgba(255,255,255,0.18)"><i style="left:3px"></i></span>`;
+        const hot = states[variables.hot] && states[variables.hot].state === 'on';
+        const over = states[variables.over] && states[variables.over].state === 'on';
+        const alarm = hot || over;
+        const bits = alarm ? [`<span class="al">${hot ? 'Overheated' : 'Overloaded'}</span>`] : [!reach ? 'Not reachable' : on ? 'On' : 'Off'];
+        if (w !== null) bits.push(Math.round(w) + ' W');
+        if (reach && kwh !== null) bits.push(kwh.toFixed(2) + ' kWh today');
+        return `<div class="sr${alarm ? ' alarm' : reach ? '' : ' gone'}"><span class="sr-i" style="color:${on ? c : 'rgba(255,255,255,0.45)'}">${plug}</span><div class="sr-t"><div class="sr-n">${variables.name}</div><div class="sr-s">${bits.join(' · ')}</div></div>${reach ? tg : ''}</div>`;
+      ]]]

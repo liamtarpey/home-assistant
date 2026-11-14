@@ -1,0 +1,37 @@
+# Lounge lights card on the main dashboard (3x2 grid). The extra round button opens the Lounge lights view.
+type: custom:button-card
+template:
+  - glass_card
+  - glass_dim
+  - glass_title
+  - glass_cta
+  - glass_bigicon
+  - lounge_scene
+styles:
+  custom_fields:
+    nav:
+      - position: absolute
+      - top: 16px
+      - right: 76px
+      - z-index: 4
+custom_fields:
+  nav:
+    card:
+      type: custom:button-card
+      show_name: false
+      icon: mdi:tune-variant
+      tap_action:
+        action: navigate
+        navigation_path: /dashboard-dashboard/lights
+      styles:
+        card:
+          - width: 46px
+          - height: 46px
+          - padding: 0
+          - border-radius: 50%
+          - border: none
+          - box-shadow: none
+          - background: rgba(255,255,255,0.14)
+        icon:
+          - width: 22px
+          - color: white

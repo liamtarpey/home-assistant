@@ -1,0 +1,33 @@
+glass_kenburns:
+  custom_fields:
+    art: >
+      [[[
+        const v = variables;
+        const img = v.kb_img || 'none';
+        const seed = String(v.kb_seed || '');
+        let h = 0;
+        for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+        const ox = 25 + (h % 51);
+        const oy = 20 + ((h >>> 8) % 51);
+        const cls = v.kb_play ? 'kb-img kb-play' : 'kb-img';
+        return `<div class="kb"><div class="${cls}" style="background-image:${img};background-size:${v.kb_size || 'cover'};background-position:${v.kb_pos || 'center'};transform-origin:${ox}% ${oy}%;--kb-z:${v.kb_zoom || 1.15}"></div></div>`;
+      ]]]
+  styles:
+    custom_fields:
+      art:
+        - position: absolute
+        - top: 0
+        - left: 0
+        - right: 0
+        - bottom: 0
+        - z-index: 0
+        - pointer-events: none
+  extra_styles: |
+    @keyframes kb-zoom {
+      from { transform: scale(1) translate(0, 0); }
+      to   { transform: scale(var(--kb-z, 1.15)) translate(-1.2%, -0.8%); }
+    }
+    .kb { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+    .kb::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0) 100%); pointer-events: none; }
+    .kb-img { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-repeat: no-repeat; }
+    .kb-img.kb-play { will-change: transform; animation: kb-zoom 24s ease-in-out infinite alternate; }

@@ -1,0 +1,16 @@
+glass_dim:
+  custom_fields:
+    dim: "[[[ return ' '; ]]]"
+  styles:
+    custom_fields:
+      dim:
+        - position: absolute
+        - top: 0
+        - left: 0
+        - right: 0
+        - bottom: 0
+        - pointer-events: none
+        - z-index: 1
+        - background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.5) 100%)
+        - opacity: "[[[ return variables.dimmed ? 1 : 0; ]]]"
+        - transition: opacity 1.2s ease

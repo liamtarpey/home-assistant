@@ -1,0 +1,283 @@
+type: custom:button-card
+template:
+  - glass_card
+entity: weather.forecast_home
+triggers_update:
+  - sensor.weather_daily_forecast
+  - sun.sun
+tap_action:
+  action: more-info
+variables:
+  cur: >
+    [[[
+      const N1 = ['#0c1433', '#1c2b62', '#2f3f86'];
+      const P = {
+        'sunny':           {k: 'clear',     icon: 'mdi:weather-sunny',             night: 'mdi:weather-night',                 text: 'Sunny',            day: ['#ffd24a', '#f6a02a', '#c26a18'], nt: N1},
+        'clear-night':     {k: 'clear',     icon: 'mdi:weather-night',             night: 'mdi:weather-night',                 text: 'Clear night',      day: N1, nt: N1},
+        'partlycloudy':    {k: 'pcloud',    icon: 'mdi:weather-partly-cloudy',     night: 'mdi:weather-night-partly-cloudy',   text: 'Partly cloudy',    day: ['#79b3ea', '#5f93cc', '#3f5f8c'], nt: ['#101a38', '#1d2a52', '#2c3a68']},
+        'cloudy':          {k: 'cloud',     icon: 'mdi:weather-cloudy',            night: 'mdi:weather-cloudy',                text: 'Cloudy',           day: ['#a3afbd', '#7a8798', '#4f5a68'], nt: ['#1d2430', '#2c3544', '#3a4556']},
+        'rainy':           {k: 'rain',      icon: 'mdi:weather-rainy',             night: 'mdi:weather-rainy',                 text: 'Rain',             day: ['#6a8aab', '#4a6684', '#2f4258'], nt: ['#101a2a', '#1b2a40', '#263a55']},
+        'pouring':         {k: 'heavyrain', icon: 'mdi:weather-pouring',           night: 'mdi:weather-pouring',               text: 'Heavy rain',       day: ['#4f6a86', '#364d66', '#223347'], nt: ['#0c1422', '#16233a', '#1f3150']},
+        'lightning':       {k: 'storm',     icon: 'mdi:weather-lightning',         night: 'mdi:weather-lightning',             text: 'Thunder',          day: ['#4a3f6e', '#322852', '#1f1838'], nt: ['#1a1330', '#261d45', '#30265a']},
+        'lightning-rainy': {k: 'storm',     icon: 'mdi:weather-lightning-rainy',   night: 'mdi:weather-lightning-rainy',       text: 'Thunder and rain', day: ['#4a3f6e', '#322852', '#1f1838'], nt: ['#1a1330', '#261d45', '#30265a']},
+        'snowy':           {k: 'snow',      icon: 'mdi:weather-snowy',             night: 'mdi:weather-snowy',                 text: 'Snow',             day: ['#d6e8f7', '#a6c1da', '#7592b1'], nt: ['#25324a', '#35476a', '#4a6088']},
+        'snowy-rainy':     {k: 'snow',      icon: 'mdi:weather-snowy-rainy',       night: 'mdi:weather-snowy-rainy',           text: 'Sleet',            day: ['#b9cde0', '#8ba5c0', '#60788f'], nt: ['#222d40', '#2f3f58', '#3f526f']},
+        'fog':             {k: 'fog',       icon: 'mdi:weather-fog',               night: 'mdi:weather-fog',                   text: 'Fog',              day: ['#b2b8c0', '#8a919b', '#626973'], nt: ['#222730', '#2f353f', '#3b424d']},
+        'windy':           {k: 'cloud',     icon: 'mdi:weather-windy',             night: 'mdi:weather-windy',                 text: 'Windy',            day: ['#8fc7c4', '#5fa5a3', '#3b7c7a'], nt: ['#14282b', '#1e3a3e', '#284c50']},
+        'windy-variant':   {k: 'cloud',     icon: 'mdi:weather-windy-variant',     night: 'mdi:weather-windy-variant',         text: 'Windy',            day: ['#8fc7c4', '#5fa5a3', '#3b7c7a'], nt: ['#14282b', '#1e3a3e', '#284c50']},
+        'hail':            {k: 'rain',      icon: 'mdi:weather-hail',              night: 'mdi:weather-hail',                  text: 'Hail',             day: ['#6a8aab', '#4a6684', '#2f4258'], nt: ['#101a2a', '#1b2a40', '#263a55']},
+        'exceptional':     {k: 'cloud',     icon: 'mdi:alert-circle-outline',      night: 'mdi:alert-circle-outline',          text: 'Exceptional',      day: ['#b5483f', '#8c2f2a', '#5a1d1b'], nt: ['#3a1514', '#531d1b', '#6b2724']}
+      };
+      const dflt = {k: 'cloud', icon: 'mdi:weather-cloudy-alert', night: 'mdi:weather-cloudy-alert', text: 'Weather', day: ['#a3afbd', '#7a8798', '#4f5a68'], nt: ['#1d2430', '#2c3544', '#3a4556']};
+      const w = entity;
+      const cond = w ? w.state : 'unknown';
+      const p = P[cond] || dflt;
+      const night = (states['sun.sun'] && states['sun.sun'].state === 'below_horizon') || cond === 'clear-night';
+      const g = night ? p.nt : p.day;
+      const sen = states['sensor.weather_daily_forecast'];
+      let fc = sen && sen.attributes ? (sen.attributes.forecast_json ?? sen.attributes.forecast) : undefined;
+      let status = 'ok';
+      if (!sen) status = 'nosensor';
+      else if (fc === undefined || fc === null) status = 'noattr';
+      else if (typeof fc === 'string') { try { fc = JSON.parse(fc); } catch (e) { fc = null; status = 'unreadable'; } }
+      if (status === 'ok' && (!Array.isArray(fc) || fc.length === 0)) status = 'empty';
+      const f0 = status === 'ok' ? fc[0] : null;
+      const t = w?.attributes?.temperature;
+      return {
+        kind: p.k, night: night, text: p.text,
+        icon: night ? p.night : p.icon,
+        sky: `linear-gradient(165deg, ${g[0]} 0%, ${g[1]} 55%, ${g[2]} 100%)`,
+        temp: (t === undefined || t === null) ? '--' : Math.round(t),
+        unit: (w && w.attributes && w.attributes.temperature_unit) || '°C',
+        status: status,
+        hasFc: status === 'ok',
+        hi: f0 && f0.temperature != null ? Math.round(f0.temperature) : null,
+        lo: f0 && f0.templow != null ? Math.round(f0.templow) : null,
+        rain: f0 && f0.precipitation_probability != null ? Math.round(f0.precipitation_probability) : null
+      };
+    ]]]
+label: >
+  [[[
+    const c = variables.cur;
+    if (!c.hasFc) return ({nosensor: 'FORECAST SENSOR MISSING', noattr: 'FORECAST ATTRIBUTE MISSING', unreadable: 'FORECAST UNREADABLE', empty: 'FORECAST EMPTY'})[c.status] || 'NO FORECAST DATA';
+    let txt = 'TODAY';
+    if (c.hi !== null) txt += ` · H ${c.hi}°`;
+    if (c.lo !== null) txt += ` · L ${c.lo}°`;
+    if (c.rain !== null && c.rain >= 30) txt += ` · ${c.rain}% RAIN`;
+    return txt;
+  ]]]
+name: "[[[ return variables.cur.text; ]]]"
+custom_fields:
+  sky: "[[[ return ' '; ]]]"
+  fx: >
+    [[[
+      const c = variables.cur;
+      const r = (i, k) => (((i + 1) * 9301 + k * 49297) % 233280) / 233280;
+      let out = '';
+      if (c.night) {
+        const rnd = (n) => { let t = (n + 0x6D2B79F5) | 0; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+        let stars = '';
+        for (let i = 0; i < 20; i++) {
+          const x = rnd(i * 5 + 1) * 96 + 1;
+          const y = rnd(i * 5 + 2) * 92 + 2;
+          const sz = 1.6 + rnd(i * 5 + 3) * 2;
+          const dur = 5 + rnd(i * 5 + 4) * 6;
+          const del = rnd(i * 5 + 5) * dur;
+          stars += `<i class="wx-star${i % 6 === 0 ? ' big' : ''}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;animation-duration:${dur.toFixed(1)}s;animation-delay:-${del.toFixed(1)}s"></i>`;
+        }
+        let rstars = '';
+        let placed = 0, tries = 0;
+        while (placed < 6 && tries < 300) {
+          const x = rnd(tries * 7 + 101) * 172 + 3;
+          const y = rnd(tries * 7 + 102) * 142 + 3;
+          tries++;
+          if (x > 24 && x < 166 && y > 40 && y < 118) continue;
+          const sz = 1.6 + rnd(tries * 7 + 103) * 2;
+          const dur = 5 + rnd(tries * 7 + 104) * 6;
+          const del = rnd(tries * 7 + 105) * dur;
+          rstars += `<i class="wx-star${placed % 3 === 0 ? ' big' : ''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;animation-duration:${dur.toFixed(1)}s;animation-delay:-${del.toFixed(1)}s"></i>`;
+          placed++;
+        }
+        out += `<div class="wx-stars">${stars}</div><div class="wx-stars-r">${rstars}</div>`;
+      }
+      if (['cloud', 'pcloud', 'rain', 'heavyrain', 'storm', 'fog'].includes(c.kind)) {
+        const n = c.kind === 'pcloud' ? 2 : 3;
+        for (let i = 0; i < n; i++) {
+          out += `<div class="wx-cloud" style="top:${8 + i * 22}%;width:${170 + i * 55}px;height:${54 + i * 14}px;animation-duration:${70 + i * 30}s;animation-delay:-${i * 24}s;opacity:${c.night ? 0.1 : 0.2}"></div>`;
+        }
+      }
+      if (['rain', 'heavyrain', 'storm'].includes(c.kind)) {
+        const n = c.kind === 'rain' ? 18 : 34;
+        for (let i = 0; i < n; i++) {
+          out += `<i class="wx-drop" style="left:${(r(i, 1) * 100).toFixed(1)}%;animation-duration:${(0.7 + r(i, 2) * 0.6).toFixed(2)}s;animation-delay:-${(r(i, 3) * 1.5).toFixed(2)}s"></i>`;
+        }
+      }
+      if (c.kind === 'snow') {
+        for (let i = 0; i < 26; i++) {
+          const sz = (3 + r(i, 3) * 3).toFixed(1);
+          out += `<i class="wx-flake" style="left:${(r(i, 1) * 100).toFixed(1)}%;width:${sz}px;height:${sz}px;animation-duration:${(6 + r(i, 2) * 5).toFixed(1)}s;animation-delay:-${(r(i, 4) * 8).toFixed(1)}s"></i>`;
+        }
+      }
+      if (c.kind === 'storm') out += '<div class="wx-flash"></div>';
+      if (c.kind === 'clear' && !c.night) out += '<div class="wx-sun"></div>';
+      if (c.kind === 'clear' && c.night) out += '<div class="wx-moon"></div>';
+      return out;
+    ]]]
+  fade: "[[[ return ' '; ]]]"
+  sunchip: >
+    [[[
+      const sun = states['sun.sun'];
+      if (!sun) return '';
+      const night = sun.state === 'below_horizon';
+      const when = night ? sun.attributes?.next_rising : sun.attributes?.next_setting;
+      if (!when) return '';
+      const tm = new Date(when).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+      const icon = night ? 'mdi:weather-sunset-up' : 'mdi:weather-sunset-down';
+      return `<div class="wx-chip"><ha-icon icon="${icon}" style="--mdc-icon-size:16px"></ha-icon><span>${night ? 'SUNRISE' : 'SUNSET'} ${tm}</span></div>`;
+    ]]]
+  temp: >
+    [[[
+      const c = variables.cur;
+      return `<div class="wx-temp"><span class="wx-n">${c.temp}</span><span class="wx-u">${c.unit}</span></div>`;
+    ]]]
+  days: >
+    [[[
+      const I = {'sunny':'mdi:weather-sunny','clear-night':'mdi:weather-night','partlycloudy':'mdi:weather-partly-cloudy','cloudy':'mdi:weather-cloudy','rainy':'mdi:weather-rainy','pouring':'mdi:weather-pouring','lightning':'mdi:weather-lightning','lightning-rainy':'mdi:weather-lightning-rainy','snowy':'mdi:weather-snowy','snowy-rainy':'mdi:weather-snowy-rainy','fog':'mdi:weather-fog','windy':'mdi:weather-windy','windy-variant':'mdi:weather-windy-variant','hail':'mdi:weather-hail','exceptional':'mdi:alert-circle-outline'};
+      const C = {'sunny':'#ffd24a','clear-night':'#c9d4ff','partlycloudy':'#e8f1ff','cloudy':'#e6ebf2','rainy':'#bfe0ff','pouring':'#9fcbff','lightning':'#e0d4ff','lightning-rainy':'#d3c4ff','snowy':'#ffffff','snowy-rainy':'#e8f4ff','fog':'#eef0f3','windy':'#d4fbf3','windy-variant':'#d4fbf3','hail':'#e8f4ff','exceptional':'#ffd0cc'};
+      const sen = states['sensor.weather_daily_forecast'];
+      let fc = sen && sen.attributes ? (sen.attributes.forecast_json ?? sen.attributes.forecast) : null;
+      if (typeof fc === 'string') { try { fc = JSON.parse(fc); } catch (e) { fc = null; } }
+      const days = Array.isArray(fc) ? fc.slice(1, 6) : [];
+      const N = 5, CH = 56, TOP = 19, SPAN = 18;
+      const rows = [];
+      for (let i = 0; i < N; i++) {
+        const f = days[i];
+        if (!f) { rows.push(null); continue; }
+        const hi = f.temperature != null ? Math.round(f.temperature) : null;
+        const lo = f.templow != null ? Math.round(f.templow) : null;
+        rows.push({name: new Date(f.datetime).toLocaleDateString('en-GB', {weekday: 'short'}).toUpperCase(), icon: I[f.condition] || 'mdi:weather-cloudy-alert', color: C[f.condition] || '#ffffff', hi: hi, lo: lo});
+      }
+      const vals = [];
+      rows.forEach(r => { if (r) { if (r.hi !== null) vals.push(r.hi); if (r.lo !== null) vals.push(r.lo); } });
+      const mx = vals.length ? Math.max(...vals) : 1, mn = vals.length ? Math.min(...vals) : 0, rg = Math.max(1, mx - mn);
+      const y = (v) => TOP + (mx - v) / rg * SPAN;
+      const x = (i) => i / (N - 1) * 100;
+      const tx = (i) => '-50%';
+      const smooth = (pts) => {
+        if (pts.length < 2) return '';
+        let d = `M${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)}`;
+        for (let i = 0; i < pts.length - 1; i++) {
+          const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || pts[i + 1];
+          const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+          d += ` C${c1[0].toFixed(2)} ${c1[1].toFixed(2)} ${c2[0].toFixed(2)} ${c2[1].toFixed(2)} ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
+        }
+        return d;
+      };
+      const extend = (pts) => {
+        if (pts.length < 2) return pts;
+        const a = pts[0], b = pts[1], c = pts[pts.length - 2], d = pts[pts.length - 1];
+        const cl = (v) => Math.min(CH, Math.max(0, v));
+        return [[a[0] - (b[0] - a[0]), cl(a[1] - (b[1] - a[1]))]].concat(pts, [[d[0] + (d[0] - c[0]), cl(d[1] + (d[1] - c[1]))]]);
+      };
+      const hiPts = [], loPts = [];
+      rows.forEach((r, i) => { if (r && r.hi !== null) hiPts.push([x(i), y(r.hi)]); if (r && r.lo !== null) loPts.push([x(i), y(r.lo)]); });
+      const head = rows.map((r) => r ? `<div class="wx-hdc"><ha-icon icon="${r.icon}" style="--mdc-icon-size:16px;color:${r.color}"></ha-icon><span class="wx-name">${r.name}</span></div>` : `<div class="wx-hdc"><span class="wx-name">--</span></div>`).join('');
+      let marks = '';
+      rows.forEach((r, i) => {
+        if (!r) return;
+        if (r.hi !== null) marks += `<i class="wx-dot" style="left:${x(i)}%;transform:translateX(${tx(i)});top:${(y(r.hi) - 3).toFixed(1)}px;background:#ffb86b"></i><span class="wx-v" style="left:${x(i)}%;transform:translateX(${tx(i)});top:${(y(r.hi) - 19).toFixed(1)}px">${r.hi}°</span>`;
+        if (r.lo !== null) marks += `<i class="wx-dot" style="left:${x(i)}%;transform:translateX(${tx(i)});top:${(y(r.lo) - 3).toFixed(1)}px;background:#74b9ff"></i><span class="wx-v lo" style="left:${x(i)}%;transform:translateX(${tx(i)});top:${(y(r.lo) + 5).toFixed(1)}px">${r.lo}°</span>`;
+      });
+      const svg = `<svg class="wx-svg" viewBox="0 0 100 ${CH}" preserveAspectRatio="none" aria-hidden="true"><path d="${smooth(extend(hiPts))}" fill="none" stroke="#ffb86b" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity="0.9"/><path d="${smooth(extend(loPts))}" fill="none" stroke="#74b9ff" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity="0.9"/></svg>`;
+      return `<div class="wx-fc"><div class="wx-hd">${head}</div><div class="wx-ch"><div class="wx-in">${svg}${marks}</div></div></div>`;
+    ]]]
+
+extra_styles: |
+  .wx-fc { position: relative; width: 100%; }
+  .wx-hd { display: flex; justify-content: space-between; height: 16px; }
+  .wx-hdc { width: 52px; height: 16px; display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; }
+  .wx-hdc ha-icon { flex: none; display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; --mdc-icon-size: 16px; }
+  .wx-name { display: block; height: 16px; line-height: 16px; position: relative; top: 0.5px; font-size: 10.5px; font-weight: 500; letter-spacing: 1.6px; color: rgba(255, 255, 255, 0.78); }
+  .wx-ch { position: relative; height: 56px; margin-top: 6px; overflow: hidden; }
+  .wx-in { position: absolute; top: 0; bottom: 0; left: 26px; right: 26px; }
+  .wx-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; }
+  .wx-dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; }
+  .wx-v { position: absolute; font-size: 12px; font-weight: 700; line-height: 14px; color: #ffffff; white-space: nowrap; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45); }
+  .wx-v.lo { font-size: 11px; font-weight: 400; color: rgba(255, 255, 255, 0.62); }
+  @keyframes wx-fall   { to { transform: translateY(300px); } }
+  @keyframes wx-snow   { 0% { transform: translate(0, -10px); } 50% { transform: translate(14px, 140px); } 100% { transform: translate(-6px, 290px); } }
+  @keyframes wx-twinkle { 0%, 68%, 100% { opacity: 0.4; transform: scale(1); box-shadow: 0 0 2px 0 rgba(255,226,122,0.35); } 78% { opacity: 1; transform: scale(1.6); box-shadow: 0 0 7px 1px rgba(255,226,122,0.9); } 90% { opacity: 0.6; transform: scale(1.25); box-shadow: 0 0 4px 1px rgba(255,226,122,0.5); } }
+  @keyframes wx-gleam { 0%, 72%, 100% { opacity: 0; } 78% { opacity: 1; } 88% { opacity: 0; } }
+  @keyframes wx-drift  { from { transform: translateX(-260px); } to { transform: translateX(110vw); } }
+  @keyframes wx-pulse  { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.08); opacity: 1; } }
+  @keyframes wx-flash  { 0%, 86%, 100% { opacity: 0; } 88% { opacity: 0.55; } 90% { opacity: 0.05; } 92% { opacity: 0.4; } 95% { opacity: 0; } }
+  .wx-stars { position: absolute; top: 0; left: 0; right: 180px; height: 84px; }
+  .wx-stars-r { position: absolute; top: 0; right: 0; width: 180px; height: 148px; }
+  .wx-star { position: absolute; border-radius: 50%; background: #ffe27a; box-shadow: 0 0 2px 0 rgba(255,226,122,0.35); opacity: 0.4; animation: wx-twinkle 7s ease-in-out infinite; }
+  .wx-star.big::before, .wx-star.big::after { content: ''; position: absolute; left: 50%; top: 50%; background: #ffe27a; border-radius: 2px; opacity: 0; animation-name: wx-gleam; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: inherit; animation-delay: inherit; }
+  .wx-star.big::before { width: 9px; height: 1.2px; margin: -0.6px 0 0 -4.5px; }
+  .wx-star.big::after { width: 1.2px; height: 9px; margin: -4.5px 0 0 -0.6px; }
+  .wx-cloud { position: absolute; left: 0; border-radius: 50%; background: #ffffff; filter: blur(16px); animation: wx-drift 80s linear infinite; }
+  .wx-drop { position: absolute; top: -20px; width: 1.5px; height: 16px; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.6)); animation: wx-fall 1s linear infinite; }
+  .wx-flake { position: absolute; top: -10px; border-radius: 50%; background: rgba(255,255,255,0.9); animation: wx-snow 8s linear infinite; }
+  .wx-flash { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #e9e1ff; opacity: 0; animation: wx-flash 7s linear infinite; }
+  .wx-sun { position: absolute; top: -70px; right: -50px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(255,247,200,0.95) 0%, rgba(255,222,120,0.45) 38%, rgba(255,222,120,0) 70%); animation: wx-pulse 7s ease-in-out infinite; }
+  .wx-moon { position: absolute; top: -50px; right: -30px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(232,238,255,0.6) 0%, rgba(176,194,255,0.18) 40%, rgba(176,194,255,0) 70%); animation: wx-pulse 9s ease-in-out infinite; }
+  .wx-chip { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 10px; border-radius: 14px; background: rgba(0, 0, 0, 0.22); color: #ffffff; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; white-space: nowrap; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .wx-temp { display: flex; align-items: flex-start; color: #ffffff; line-height: 1; white-space: nowrap; text-shadow: 0 2px 14px rgba(0,0,0,0.35); }
+  .wx-n { font-size: 66px; font-weight: 700; letter-spacing: -2px; }
+  .wx-u { font-size: 26px; font-weight: 600; margin: 7px 0 0 2px; }
+styles:
+  custom_fields:
+    sky:
+      - position: absolute
+      - top: 0
+      - left: 0
+      - right: 0
+      - bottom: 0
+      - z-index: 0
+      - pointer-events: none
+      - background-image: "[[[ return variables.cur.sky; ]]]"
+    fx:
+      - position: absolute
+      - top: 0
+      - left: 0
+      - right: 0
+      - bottom: 0
+      - z-index: 0
+      - overflow: hidden
+      - pointer-events: none
+    fade:
+      - position: absolute
+      - top: 0
+      - left: 0
+      - right: 0
+      - bottom: 0
+      - z-index: 1
+      - pointer-events: none
+      - background: linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.35) 38%, rgba(0,0,0,0) 72%)
+    sunchip:
+      - position: absolute
+      - top: 16px
+      - left: 22px
+      - z-index: 4
+    temp:
+      - position: absolute
+      - top: 79px
+      - right: 85px
+      - transform: translate(50%, -50%)
+      - z-index: 2
+      - pointer-events: none
+    days:
+      - position: relative
+      - z-index: 3
+      - justify-self: stretch
+      - padding: 0 22px 12px 22px
+  grid:
+    - grid-template-areas: '"." "l" "n" "days"'
+    - grid-template-rows: 1fr min-content min-content min-content
+    - position: relative
+  label:
+    - color: rgba(255,255,255,0.85)
+  name:
+    - text-shadow: 0 1px 10px rgba(0,0,0,0.35)

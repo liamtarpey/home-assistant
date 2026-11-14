@@ -1,0 +1,25 @@
+ut_water:
+  triggers_update: [sensor.electricity_cost_this_month, sensor.gas_cost_this_month, sensor.electricity_usage_this_month, sensor.gas_usage_this_month]
+  custom_fields:
+    body: |
+      [[[
+        const num = (v) => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
+        const st = (id) => states[id] ? states[id].state : undefined;
+        const pick = (re) => { const k = Object.keys(states).find(id => re.test(id)); return k ? states[k].state : undefined; };
+        const d = new Date();
+        const day = d.getDate();
+        const dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        const e = num(st('sensor.electricity_cost_this_month'));
+        const g = num(st('sensor.gas_cost_this_month'));
+        const W = 56;
+        const total = e + g + W;
+        const pct = (x) => total > 0 ? Math.round(x / total * 100) : 0;
+        const gbp = (x) => '£' + x.toFixed(2);
+        const dot = '<span class="ut-dw"><span class="ut-dr"></span><span class="ut-dc"></span></span>';
+        return `<div class="ut" style="min-height:250px"><div class="ut-glow" style="background:radial-gradient(circle at 90% 6%, rgba(77,163,255,0.32) 0%, rgba(77,163,255,0) 58%)"></div>`
+          + `<svg class="ut-wv" viewBox="0 0 800 64" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 Q 100 6 200 30 T 400 30 T 600 30 T 800 30 V 64 H 0 Z" fill="rgba(77,163,255,0.16)"/></svg>`
+          + `<svg class="ut-wv ut-wv2" viewBox="0 0 800 64" preserveAspectRatio="none" aria-hidden="true"><path d="M0 34 Q 100 12 200 34 T 400 34 T 600 34 T 800 34 V 64 H 0 Z" fill="rgba(77,163,255,0.12)"/></svg>`
+          + `<div class="ut-head"><span class="ut-ttl"><span class="ut-ico" style="color:#4da3ff"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3C12 3 6 10 6 14a6 6 0 0 0 12 0c0-4-6-11-6-11z" fill="currentColor"/></svg></span>Water</span></div>`
+          + `<div class="ut-bigc">${gbp(W)}</div><div class="ut-cap" style="position:relative">Monthly bill · fixed</div>`
+          + `<div class="ut-tiles t3"><div class="ut-tile"><div class="ut-tl">Per day</div><div class="ut-tv">${gbp(W / dim)}</div></div><div class="ut-tile"><div class="ut-tl">Per year</div><div class="ut-tv">£${W * 12}</div></div><div class="ut-tile"><div class="ut-tl">Share</div><div class="ut-tv">${pct(W)}%</div></div></div></div>`;
+      ]]]

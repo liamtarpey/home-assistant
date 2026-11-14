@@ -1,0 +1,7 @@
+# Bedroom lights view card (view type: Panel). Needs templates: page_shell, bedroom_page, lt_hero_room
+type: custom:button-card
+template:
+  - page_shell
+  - bedroom_page
+grid_options:
+  columns: full

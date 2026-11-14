@@ -1,0 +1,43 @@
+scene_btn:
+  show_name: false
+  triggers_update: [scene.movie_mode, scene.party_mode, scene.sleep_mode, scene.off_mode, scene.pink_bright, scene.pink_dim, scene.green_bright, scene.green_dim, scene.blue_bright, scene.blue_dim, scene.red_bright, scene.red_dim, light.wiz_rgbw_tunable_181e98, light.lounge_lounge_candle, light.wiz_rgbw_tunable_19f62e, light.wiz_rgbw_tunable_1a3d76, light.lounge_lightstrip_left, light.lounge_lightstrip_right]
+  tap_action:
+    action: perform-action
+    perform_action: scene.turn_on
+    target:
+      entity_id: '[[[ return variables.id; ]]]'
+  styles:
+    card:
+      - position: relative
+      - width: 46px
+      - height: 46px
+      - padding: 0
+      - border: none
+      - border-radius: 50%
+      - background: |
+          [[[
+            const ids = ['scene.movie_mode','scene.party_mode','scene.sleep_mode','scene.off_mode','scene.pink_bright','scene.pink_dim','scene.green_bright','scene.green_dim','scene.blue_bright','scene.blue_dim','scene.red_bright','scene.red_dim'];
+            const L = ['light.wiz_rgbw_tunable_181e98', 'light.lounge_lounge_candle', 'light.wiz_rgbw_tunable_19f62e', 'light.wiz_rgbw_tunable_1a3d76', 'light.lounge_lightstrip_left', 'light.lounge_lightstrip_right'];
+            let best = null, t = 0;
+            for (const id of ids) { const v = Date.parse(states[id]?.state); if (v && v > t) { t = v; best = id; } }
+            const ls = L.map(id => states[id]).filter(Boolean);
+            const anyOn = ls.some(s => s.state === 'on');
+            const latest = ls.reduce((m, s) => Math.max(m, Date.parse(s.last_updated) || 0), 0);
+            const active = best === variables.id && (best === 'scene.off_mode' ? !anyOn : (anyOn && latest <= t + 60000));
+            return active ? `${variables.color}55` : 'rgba(255,255,255,0.14)';
+          ]]]
+      - box-shadow: |
+          [[[
+            const ids = ['scene.movie_mode','scene.party_mode','scene.sleep_mode','scene.off_mode','scene.pink_bright','scene.pink_dim','scene.green_bright','scene.green_dim','scene.blue_bright','scene.blue_dim','scene.red_bright','scene.red_dim'];
+            const L = ['light.wiz_rgbw_tunable_181e98', 'light.lounge_lounge_candle', 'light.wiz_rgbw_tunable_19f62e', 'light.wiz_rgbw_tunable_1a3d76', 'light.lounge_lightstrip_left', 'light.lounge_lightstrip_right'];
+            let best = null, t = 0;
+            for (const id of ids) { const v = Date.parse(states[id]?.state); if (v && v > t) { t = v; best = id; } }
+            const ls = L.map(id => states[id]).filter(Boolean);
+            const anyOn = ls.some(s => s.state === 'on');
+            const latest = ls.reduce((m, s) => Math.max(m, Date.parse(s.last_updated) || 0), 0);
+            const active = best === variables.id && (best === 'scene.off_mode' ? !anyOn : (anyOn && latest <= t + 60000));
+            return active ? `inset 0 0 0 2px ${variables.color}` : 'none';
+          ]]]
+    icon:
+      - width: '[[[ return variables.icon_size || ''22px''; ]]]'
+      - color: '[[[ return variables.color; ]]]'

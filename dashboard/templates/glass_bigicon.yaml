@@ -1,0 +1,17 @@
+glass_bigicon:
+  custom_fields:
+    bigicon: >
+      [[[
+        const v = variables[variables.bigicon_src] || {};
+        const icon = variables.bigicon_name || v.icon;
+        if (!icon) return '';
+        return `<ha-icon icon="${icon}" style="--mdc-icon-size:${variables.bigicon_size || 116}px;color:rgba(255,255,255,0.13)"></ha-icon>`;
+      ]]]
+  styles:
+    custom_fields:
+      bigicon:
+        - position: absolute
+        - top: 14px
+        - right: 50px
+        - z-index: 1
+        - pointer-events: none

@@ -1,0 +1,76 @@
+# TfL view card (view type: Panel)
+# (the whole block below, from "type:" onwards)
+type: custom:button-card
+template: page_shell
+styles:
+  grid:
+    - grid-template-areas: '"hero hero side" "a b b"'
+custom_fields:
+  hero:
+    card:
+      type: custom:button-card
+      template:
+        - tfl_base
+        - tfl_hero
+  side:
+    card:
+      type: custom:button-card
+      template:
+        - tfl_base
+        - tfl_dlr
+  a:
+    card:
+      type: vertical-stack
+      cards:
+        - type: custom:button-card
+          template:
+            - tfl_base
+            - tfl_open
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_bakerloo, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_bakerloo, tap_action: {action: more-info}, variables: {line: 'Bakerloo', color: '#B36305', img: bakerloo}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_central, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_central, tap_action: {action: more-info}, variables: {line: 'Central', color: '#E32017', img: central}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_circle, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_circle, tap_action: {action: more-info}, variables: {line: 'Circle', color: '#FFD300', img: circle}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_district, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_district, tap_action: {action: more-info}, variables: {line: 'District', color: '#00782A', img: district}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_dlr, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_dlr, tap_action: {action: more-info}, variables: {line: 'DLR', color: '#00A4A7', img: dlr}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_elizabeth_line, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_elizabeth_line, tap_action: {action: more-info}, variables: {line: 'Elizabeth line', color: '#6950A1', img: elizabeth}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_hammersmith_city, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_hammersmith_city, tap_action: {action: more-info}, variables: {line: 'Hammersmith & City', color: '#F3A9BB', img: hammersmith-city}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_jubilee, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_jubilee, tap_action: {action: more-info}, variables: {line: 'Jubilee', color: '#A0A5A9', img: jubilee}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_metropolitan, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_metropolitan, tap_action: {action: more-info}, variables: {line: 'Metropolitan', color: '#9B0056', img: metropolitan}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_northern, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_northern, tap_action: {action: more-info}, variables: {line: 'Northern', color: '#8A8F98', img: northern}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_piccadilly, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_piccadilly, tap_action: {action: more-info}, variables: {line: 'Piccadilly', color: '#2F66CC', img: piccadilly}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_victoria, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_victoria, tap_action: {action: more-info}, variables: {line: 'Victoria', color: '#0098D4', img: victoria}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_waterloo_city, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_waterloo_city, tap_action: {action: more-info}, variables: {line: 'Waterloo & City', color: '#95CDBA', img: waterloo-city}}
+        - type: conditional
+          conditions: [{condition: state, entity: sensor.london_underground_tram, state_not: [Good Service, Service Closed, unavailable, unknown]}]
+          card: {type: custom:button-card, template: [tfl_base, tfl_disruption], entity: sensor.london_underground_tram, tap_action: {action: more-info}, variables: {line: 'Tram', color: '#84B817', img: tram}}
+  b:
+    card:
+      type: custom:button-card
+      template:
+        - tfl_base
+        - tfl_all

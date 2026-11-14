@@ -1,0 +1,1 @@
+lt_more: {show_name: false, icon: mdi:palette, tap_action: {action: more-info}, styles: {card: [{width: 30px}, {height: 30px}, {padding: 0}, {border-radius: 50%}, {border: none}, {box-shadow: none}, {background: 'rgba(255,255,255,0.14)'}], icon: [{width: 17px}, {color: 'rgba(255,255,255,0.85)'}]}}

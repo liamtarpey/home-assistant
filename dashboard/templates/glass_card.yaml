@@ -1,0 +1,86 @@
+glass_card:
+  grid_options:
+    columns: full
+  show_icon: false
+  show_state: false
+  show_name: true
+  show_label: true
+  tap_action:
+    action: none
+  extra_styles: |
+    @keyframes live-ring {
+      0%   { transform: scale(1); opacity: 0.75; }
+      16%  { transform: scale(3); opacity: 0; }
+      100% { transform: scale(3); opacity: 0; }
+    }
+    @keyframes live-dot {
+      0%, 100% { transform: scale(1); }
+      6%       { transform: scale(1.25); }
+      14%      { transform: scale(1); }
+    }
+    .live-wrap {
+      position: relative;
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 7px;
+      flex: none;
+      overflow: visible;
+    }
+    .live-ring, .live-dot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      box-sizing: border-box;
+    }
+    .live-ring {
+      border: 2px solid #3ddc84;
+      animation: live-ring 6s ease-out infinite;
+    }
+    .live-dot {
+      background: #3ddc84;
+      box-shadow: 0 0 8px rgba(61, 220, 132, 0.9);
+      animation: live-dot 6s ease-in-out infinite;
+    }
+  styles:
+    card:
+      - position: relative
+      - height: 250px
+      - padding: 0
+      - border: none
+      - box-shadow: none
+      - border-radius: 18px
+      - overflow: hidden
+      - background-color: rgb(18, 20, 26)
+    grid:
+      - grid-template-areas: '"." "l" "n"'
+      - grid-template-rows: 1fr min-content min-content
+      - position: relative
+    label:
+      - position: relative
+      - z-index: 2
+      - display: flex
+      - align-items: center
+      - overflow: visible
+      - text-overflow: clip
+      - justify-self: start
+      - align-self: end
+      - padding: 0 22px 2px 22px
+      - font-size: 12px
+      - letter-spacing: 2px
+      - text-transform: uppercase
+      - color: rgba(255,255,255,0.7)
+    name:
+      - position: relative
+      - z-index: 2
+      - justify-self: start
+      - align-self: end
+      - padding: 0 22px 16px 22px
+      - font-size: 30px
+      - font-weight: 700
+      - color: white
+      - text-align: left
+      - white-space: normal

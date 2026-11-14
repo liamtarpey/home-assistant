@@ -1,0 +1,42 @@
+tfl_open:
+  triggers_update:
+    [sensor.london_underground_bakerloo, sensor.london_underground_central, sensor.london_underground_circle, sensor.london_underground_district, sensor.london_underground_dlr, sensor.london_underground_elizabeth_line, sensor.london_underground_hammersmith_city, sensor.london_underground_jubilee, sensor.london_underground_metropolitan, sensor.london_underground_northern, sensor.london_underground_piccadilly, sensor.london_underground_victoria, sensor.london_underground_waterloo_city, sensor.london_underground_tram]
+  custom_fields:
+    body: |
+      [[[
+        const L = variables.lines;
+        const isGood = (s) => s === 'Good Service';
+        const isGone = (s) => !s || s === 'unavailable' || s === 'unknown';
+        const isClosed = (s) => /^service closed$/i.test(s || '');
+        const rows = L.map(l => {
+          const s = states[l.e] ? states[l.e].state : '';
+          const k = isGone(s) ? 'gone' : isClosed(s) ? 'closed' : isGood(s) ? 'good' : 'bad';
+          return {l: l, s: s, k: k};
+        });
+        const cnt = (k) => rows.filter(r => r.k === k).length;
+        const good = cnt('good'), bad = cnt('bad'), closed = cnt('closed'), gone = cnt('gone');
+        const total = rows.length, open = good + bad;
+        const glow = bad ? '255,176,32' : open === 0 ? '99,102,241' : '61,220,132';
+        const dot = '<span class="tf-dw"><span class="tf-dr"></span><span class="tf-dc"></span></span>';
+        const R = 60, C = 2 * Math.PI * R;
+        let off = 0;
+        const segs = [[good, '#3ddc84'], [bad, '#ffb020'], [closed, '#7c83ff'], [gone, 'rgba(255,255,255,0.2)']].filter(x => x[0] > 0).map(x => {
+          const part = x[0] / total * C;
+          const len = Math.max(0, part - (total > 1 ? 4 : 0));
+          const c = `<circle cx="70" cy="70" r="${R}" fill="none" stroke="${x[1]}" stroke-width="14" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 70 70)"/>`;
+          off += part;
+          return c;
+        }).join('');
+        const order = {good: 0, bad: 1, closed: 2, gone: 3};
+        const roundels = rows.slice().sort((a, b) => order[a.k] - order[b.k]).map(r => {
+          const st = r.k === 'closed' ? 'opacity:0.22;filter:grayscale(1)' : r.k === 'gone' ? 'opacity:0.12;filter:grayscale(1)' : r.k === 'bad' ? 'box-shadow:0 0 0 2px #ffb020;border-radius:50%' : '';
+          return `<img src="/local/svg/tfl/roundel-${r.l.i}-no-text.svg" alt="${r.l.n}" title="${r.l.n} · ${r.s}" style="width:34px;height:34px;${st}">`;
+        }).join('');
+        const stat = (n, label, col) => `<div style="text-align:center"><div style="font-size:28px;font-weight:700;line-height:1;color:${n ? col : 'rgba(255,255,255,0.35)'}">${n}</div><div style="margin-top:6px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.7)">${label}</div></div>`;
+        return `<div class="tf" style="min-height:430px"><div class="tf-glow" style="background:radial-gradient(circle at 88% 0%, rgba(${glow},0.3) 0%, rgba(${glow},0) 60%)"></div>`
+          + `<div class="tf-head"><span class="tf-ttl">Lines open</span><span class="tf-upd">${bad ? bad + ' disrupted' : dot + 'No disruptions'}</span></div>`
+          + `<div style="position:relative;width:150px;height:150px;margin:18px auto 0"><svg width="150" height="150" viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="${R}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="14"/>${segs}</svg>`
+          + `<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:44px;font-weight:700;line-height:1">${open}</div><div style="margin-top:5px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7)">open</div><div style="margin-top:2px;font-size:12px;color:rgba(255,255,255,0.55)">of ${total} lines</div></div></div>`
+          + `<div style="position:relative;display:flex;justify-content:space-around;margin-top:20px">${stat(good, 'Running', '#3ddc84')}${stat(bad, 'Disrupted', '#ffb020')}${stat(closed, 'Closed', '#9fa8ff')}</div>`
+          + `<div style="position:relative;margin-top:auto;padding-top:22px;display:grid;grid-template-columns:repeat(7, 1fr);gap:10px 6px;justify-items:center">${roundels}</div></div>`;
+      ]]]

@@ -1,0 +1,117 @@
+studio_hero:
+  show_name: false
+  show_icon: false
+  tap_action:
+    action: none
+  triggers_update: [switch.office_studio_power_speakers_and_amps_yahama_msp5_left, switch.office_studio_power_speakers_and_amps_yamaha_msp5_right, switch.office_studio_power_speakers_and_amps_evh_5150iii, switch.office_studio_power_speakers_and_amps_little_walter_22w, sensor.office_power_yamaha_msp5_left_current_consumption, sensor.office_power_yamaha_msp5_right_current_consumption, sensor.office_power_evh_5150iii_current_consumption, sensor.office_power_little_walter_22w_current_consumption, binary_sensor.office_power_yamaha_msp5_left_overheated, binary_sensor.office_power_yamaha_msp5_left_overloaded, binary_sensor.office_power_yamaha_msp5_right_overheated, binary_sensor.office_power_yamaha_msp5_right_overloaded, binary_sensor.office_power_evh_5150iii_overheated, binary_sensor.office_power_evh_5150iii_overloaded, binary_sensor.office_power_little_walter_22w_overheated, binary_sensor.office_power_little_walter_22w_overloaded]
+  variables:
+    warmup: 120
+  styles:
+    card:
+      - background: rgb(18,20,26)
+      - border: none
+      - border-radius: 18px
+      - box-shadow: none
+      - padding: 0
+      - overflow: hidden
+      - height: 250px
+      - cursor: default
+    grid:
+      - grid-template-areas: '"body"'
+      - grid-template-columns: minmax(0, 1fr)
+      - position: relative
+    custom_fields:
+      body:
+        - justify-self: stretch
+        - align-self: stretch
+        - width: 100%
+        - min-width: 0
+  extra_styles: |
+    .sh { position: relative; box-sizing: border-box; width: 100%; height: 250px; color: #ffffff; font-family: Roboto, system-ui, sans-serif; text-align: left; }
+    .sh-glow { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; transform-origin: 70% 0; animation: sh-breathe 8s ease-in-out infinite; }
+    .sh-lbl { position: absolute; left: 28px; top: 20px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+    .sh-head { position: absolute; left: 28px; top: 44px; right: 90px; display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+    .sh-big { font-size: 38px; font-weight: 700; line-height: 1.1; }
+    .sh-sub { font-size: 14px; color: rgba(255,255,255,0.7); overflow: hidden; text-overflow: ellipsis; }
+    .sh-mid { position: absolute; left: 28px; top: 112px; width: 430px; max-width: calc(100% - 56px); font-size: 13px; color: rgba(255,255,255,0.55); }
+    .sh-warm { animation: sh-fade 0.6s ease forwards; }
+    .sh-wt { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+    .sh-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.14); overflow: hidden; }
+    .sh-bar i { display: block; height: 100%; border-radius: 3px; transform-origin: left; background: linear-gradient(90deg, #ff7a45, #ffb347); animation-name: sh-fill; animation-timing-function: linear; animation-fill-mode: forwards; }
+    .sh-chips { position: absolute; left: 28px; right: 28px; bottom: 24px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .sh-chip { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 10px; border-radius: 18px; background: rgba(255,255,255,0.12); font-size: 13px; font-weight: 500; white-space: nowrap; }
+    .sh-chip.off { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); }
+    .sh-chip.gone { background: none; border: 1.5px dashed rgba(255,255,255,0.2); padding: 5.5px 13px 5.5px 9px; color: rgba(255,255,255,0.5); }
+    .sh-led { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+    @keyframes sh-breathe { 0%, 100% { opacity: 0.75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.07); } }
+    @keyframes sh-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes sh-fade { to { opacity: 0; } }
+  custom_fields:
+    body: |
+      [[[
+        const GROUPS = [
+          {n: 'Speakers', c: '#3ddc84', ids: ['switch.office_studio_power_speakers_and_amps_yahama_msp5_left', 'switch.office_studio_power_speakers_and_amps_yamaha_msp5_right'], w: ['sensor.office_power_yamaha_msp5_left_current_consumption', 'sensor.office_power_yamaha_msp5_right_current_consumption']},
+          {n: 'EVH 5150III', c: '#ff3b30', ids: ['switch.office_studio_power_speakers_and_amps_evh_5150iii'], w: ['sensor.office_power_evh_5150iii_current_consumption']},
+          {n: 'Little Walter', c: '#ffb347', ids: ['switch.office_studio_power_speakers_and_amps_little_walter_22w'], w: ['sensor.office_power_little_walter_22w_current_consumption']}
+        ];
+        const st = (id) => states[id] ? states[id].state : undefined;
+        const reach = (s) => !!s && !['unavailable', 'unknown'].includes(s);
+        const devs = GROUPS.map(g => {
+          const ss = g.ids.map(st);
+          const s = ss.some(x => x === 'on') ? 'on' : ss.some(reach) ? 'off' : undefined;
+          const ws = g.w.map(id => parseFloat(st(id)));
+          const w = g.ids.reduce((a, id, i) => a + (st(id) === 'on' && !isNaN(ws[i]) ? ws[i] : 0), 0);
+          const hasW = g.ids.some((id, i) => st(id) === 'on' && !isNaN(ws[i]));
+          return {n: g.n, c: g.c, ids: g.ids, s: s, w: w, hasW: hasW};
+        });
+        const ALARMS = [['Left speaker', 'overheated', 'binary_sensor.office_power_yamaha_msp5_left_overheated', 'switch.office_studio_power_speakers_and_amps_yahama_msp5_left'], ['Left speaker', 'overloaded', 'binary_sensor.office_power_yamaha_msp5_left_overloaded', 'switch.office_studio_power_speakers_and_amps_yahama_msp5_left'], ['Right speaker', 'overheated', 'binary_sensor.office_power_yamaha_msp5_right_overheated', 'switch.office_studio_power_speakers_and_amps_yamaha_msp5_right'], ['Right speaker', 'overloaded', 'binary_sensor.office_power_yamaha_msp5_right_overloaded', 'switch.office_studio_power_speakers_and_amps_yamaha_msp5_right'], ['EVH 5150III', 'overheated', 'binary_sensor.office_power_evh_5150iii_overheated', 'switch.office_studio_power_speakers_and_amps_evh_5150iii'], ['EVH 5150III', 'overloaded', 'binary_sensor.office_power_evh_5150iii_overloaded', 'switch.office_studio_power_speakers_and_amps_evh_5150iii'], ['Little Walter', 'overheated', 'binary_sensor.office_power_little_walter_22w_overheated', 'switch.office_studio_power_speakers_and_amps_little_walter_22w'], ['Little Walter', 'overloaded', 'binary_sensor.office_power_little_walter_22w_overloaded', 'switch.office_studio_power_speakers_and_amps_little_walter_22w']];
+        const alarms = ALARMS.filter(a => st(a[2]) === 'on');
+        const known = devs.filter(d => reach(d.s));
+        const on = devs.filter(d => d.s === 'on');
+        const watts = devs.reduce((a, d) => a + d.w, 0);
+        const hasW = devs.some(d => d.hasW);
+        const WU = variables.warmup || 120;
+        const wave = (col) => { const hs = [8, 16, 26, 14, 7]; return `<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" style="flex:none">${hs.map((h, i) => `<rect x="${(3 + i * 7.6).toFixed(1)}" y="${(20 - h / 2).toFixed(1)}" width="4.2" height="${h}" rx="2.1" fill="${col}"/>`).join('')}</svg>`; };
+        let title, sub, col, mid;
+        if (!known.length) { title = 'Not connected yet'; sub = 'Waiting for the power strip'; col = 'rgba(255,255,255,0.3)'; mid = 'Check the strip is online in the Tapo app.'; }
+        else if (!on.length) { title = 'Studio off'; sub = 'Everything powered down'; col = 'rgba(255,255,255,0.4)'; mid = 'Power up runs everything on; shut down switches it all off.'; }
+        else { title = 'Rig live'; sub = on.length + ' of ' + devs.length + ' on' + (hasW ? ' · ' + Math.round(watts) + ' W' : ''); col = '#ffd9a0'; mid = ''; }
+        if (alarms.length) {
+          title = alarms.length === 1 ? alarms[0][0] + ' ' + alarms[0][1] : alarms.length + ' warnings';
+          sub = alarms.length === 1 ? 'Check it before using it' : alarms.map(a => a[0] + ' ' + a[1]).join(' · ');
+          col = '#ff6b5e';
+          mid = '<div style="color:#ff6b5e;font-weight:600;font-size:14px">Warning from the power strip</div><div style="margin-top:6px">Check the equipment, its ventilation and the socket before using it again.</div>';
+        }
+        const warming = alarms.length ? [] : devs.slice(1).filter(d => d.s === 'on' && states[d.ids[0]].last_changed && (Date.now() - Date.parse(states[d.ids[0]].last_changed)) / 1000 < WU);
+        if (warming.length) {
+          const el = Math.min(...warming.map(d => (Date.now() - Date.parse(states[d.ids[0]].last_changed)) / 1000));
+          const rem = Math.max(0, WU - el);
+          const who = warming.length > 1 ? 'Amps' : warming[0].n;
+          mid = `<div class="sh-warm" style="animation-delay:${rem.toFixed(1)}s"><div class="sh-wt"><span style="color:#ffb347;font-weight:600">${who} warming up</span><span style="color:rgba(255,255,255,0.7)">about ${rem >= 60 ? Math.ceil(rem / 60) + ' min' : Math.ceil(rem) + ' s'} left</span></div><div class="sh-bar"><i style="animation-duration:${WU}s;animation-delay:-${el.toFixed(1)}s"></i></div><div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.55)">Standby is manual: flip it when the valves are ready</div></div>`;
+        }
+        const g = (d, pos) => d.s === 'on' ? `radial-gradient(circle at ${pos}% 0%, ${d.c}3d 0%, ${d.c}00 48%)` : '';
+        const glow = alarms.length ? 'radial-gradient(circle at 80% 0%, rgba(255,90,77,0.34) 0%, rgba(255,90,77,0) 55%)' : [g(devs[2], 55), g(devs[0], 82), g(devs[1], 98)].filter(Boolean).join(', ') || 'radial-gradient(circle at 96% 0%, rgba(120,130,160,0.16) 0%, rgba(120,130,160,0) 55%)';
+        const chips = devs.map(d => alarms.some(a => d.ids.includes(a[3])) ? `<span class="sh-chip" style="background:rgba(255,90,77,0.22);color:#ffb3ab"><span class="sh-led" style="background:#ff5a4d;box-shadow:0 0 8px #ff5a4d"></span>${d.n}</span>` : !reach(d.s) ? `<span class="sh-chip gone"><span class="sh-led" style="border:1.5px dashed rgba(255,255,255,0.35);box-sizing:border-box"></span>${d.n}</span>` : d.s === 'on' ? `<span class="sh-chip"><span class="sh-led" style="background:${d.c};box-shadow:0 0 8px ${d.c}"></span>${d.n}</span>` : `<span class="sh-chip off"><span class="sh-led" style="background:rgba(255,255,255,0.25)"></span>${d.n}</span>`).join('');
+        return `<div class="sh"><div class="sh-glow" style="background:${glow}"></div><div class="sh-lbl">Studio</div><div class="sh-head">${wave(col)}<span class="sh-big">${title}</span><span class="sh-sub">${sub}</span></div><div class="sh-mid">${mid}</div><div class="sh-chips">${chips}</div></div>`;
+      ]]]
+    cta:
+      card:
+        type: custom:button-card
+        template: glass_power_btn
+        triggers_update: [switch.office_studio_power_speakers_and_amps_yahama_msp5_left, switch.office_studio_power_speakers_and_amps_yamaha_msp5_right, switch.office_studio_power_speakers_and_amps_evh_5150iii, switch.office_studio_power_speakers_and_amps_little_walter_22w]
+        variables:
+          is_off: |
+            [[[
+              const ids = ['switch.office_studio_power_speakers_and_amps_yahama_msp5_left', 'switch.office_studio_power_speakers_and_amps_yamaha_msp5_right', 'switch.office_studio_power_speakers_and_amps_evh_5150iii', 'switch.office_studio_power_speakers_and_amps_little_walter_22w'];
+              return !ids.some(i => states[i] && states[i].state === 'on');
+            ]]]
+        tap_action:
+          action: perform-action
+          perform_action: homeassistant.toggle
+          target:
+            entity_id: |
+              [[[
+                const ids = ['switch.office_studio_power_speakers_and_amps_yahama_msp5_left', 'switch.office_studio_power_speakers_and_amps_yamaha_msp5_right', 'switch.office_studio_power_speakers_and_amps_evh_5150iii', 'switch.office_studio_power_speakers_and_amps_little_walter_22w'];
+                const on = ids.filter(i => states[i] && states[i].state === 'on');
+                return (on.length ? on : ids).join(',');
+              ]]]

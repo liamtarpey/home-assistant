@@ -1,0 +1,29 @@
+lt_hero:
+  triggers_update: [light.wiz_rgbw_tunable_181e98, light.lounge_lounge_candle, light.wiz_rgbw_tunable_19f62e, light.wiz_rgbw_tunable_1a3d76, light.lounge_lightstrip_left, light.lounge_lightstrip_right, light.all_lounge_lights]
+  custom_fields:
+    fx: |
+      [[[
+        const IC = variables.icons;
+        const ico = (kind, size, col) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" fill="${col}">${IC[kind] || IC.lamp}</svg>`;
+        const rgbOf = (en) => (en && en.attributes && Array.isArray(en.attributes.rgb_color)) ? en.attributes.rgb_color : [255, 200, 140];
+        const pctOf = (en) => Math.round(((en && en.attributes && en.attributes.brightness) || 0) / 255 * 100);
+        const ids = ['light.wiz_rgbw_tunable_181e98', 'light.lounge_lounge_candle', 'light.wiz_rgbw_tunable_19f62e', 'light.wiz_rgbw_tunable_1a3d76', 'light.lounge_lightstrip_left', 'light.lounge_lightstrip_right'];
+        const on = ids.filter(id => states[id] && states[id].state === 'on');
+        if (!on.length) return '<div class="lt"><div class="lt-glow"></div></div>';
+        const a = rgbOf(states[on[0]]).slice(0, 3).join(','), b = rgbOf(states[on[on.length - 1]]).slice(0, 3).join(',');
+        return `<div class="lt"><div class="lt-glow br" style="background:radial-gradient(circle at 12% 0%, rgba(${a},0.26) 0%, rgba(${a},0) 50%), radial-gradient(circle at 92% 0%, rgba(${b},0.3) 0%, rgba(${b},0) 55%)"></div></div>`;
+      ]]]
+    top: |
+      [[[
+        const IC = variables.icons;
+        const ico = (kind, size, col) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" fill="${col}">${IC[kind] || IC.lamp}</svg>`;
+        const rgbOf = (en) => (en && en.attributes && Array.isArray(en.attributes.rgb_color)) ? en.attributes.rgb_color : [255, 200, 140];
+        const pctOf = (en) => Math.round(((en && en.attributes && en.attributes.brightness) || 0) / 255 * 100);
+        const ids = ['light.wiz_rgbw_tunable_181e98', 'light.lounge_lounge_candle', 'light.wiz_rgbw_tunable_19f62e', 'light.wiz_rgbw_tunable_1a3d76', 'light.lounge_lightstrip_left', 'light.lounge_lightstrip_right'];
+        const on = ids.filter(id => states[id] && states[id].state === 'on');
+        const n = on.length;
+        const avg = n ? Math.round(on.reduce((s, id) => s + pctOf(states[id]), 0) / n) : 0;
+        const title = n === 0 ? 'All lights off' : n === 1 ? '1 light on' : `${n} lights on`;
+        const bulb = `<svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" fill="${n ? '#ffd24a' : 'rgba(255,255,255,0.45)'}"><path d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z"/></svg>`;
+        return `<div class="lt" style="height:116px"><div class="lt-ttl" style="position:absolute;top:18px;left:22px">Lounge lights</div><div class="lt-big" style="position:absolute;left:22px;right:22px;bottom:0;margin:0">${bulb}<span>${title}</span>${n ? `<span class="lt-sub" style="position:relative;top:2px;min-width:0">${avg}% average brightness</span>` : ''}</div></div>`;
+      ]]]

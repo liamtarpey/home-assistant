@@ -1,0 +1,15 @@
+glass_title:
+  custom_fields:
+    title: "[[[ return variables.title_text || ''; ]]]"
+  styles:
+    custom_fields:
+      title:
+        - position: absolute
+        - top: 18px
+        - left: 22px
+        - z-index: 3
+        - pointer-events: none
+        - font-size: 12px
+        - letter-spacing: 2px
+        - text-transform: uppercase
+        - color: rgba(255,255,255,0.7)

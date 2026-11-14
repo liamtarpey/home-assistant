@@ -1,0 +1,31 @@
+lt_head:
+  show_name: false
+  show_icon: false
+  tap_action:
+    action: toggle
+  hold_action:
+    action: more-info
+  styles:
+    card:
+      - background: none
+      - border: none
+      - border-radius: 0
+      - box-shadow: none
+      - padding: 0
+      - overflow: visible
+      - height: auto
+      - cursor: pointer
+  custom_fields:
+    body: |
+      [[[
+        const IC = variables.icons;
+        const ico = (kind, size, col) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" fill="${col}">${IC[kind] || IC.lamp}</svg>`;
+        const rgbOf = (en) => (en && en.attributes && Array.isArray(en.attributes.rgb_color)) ? en.attributes.rgb_color : [255, 200, 140];
+        const pctOf = (en) => Math.round(((en && en.attributes && en.attributes.brightness) || 0) / 255 * 100);
+        const on = entity && entity.state === 'on';
+        const kind = variables.kind;
+        const c = on ? rgbOf(entity).slice(0, 3).join(',') : '255,255,255';
+        const ic = on ? `<span class="lt-hic" style="background:rgba(${c},0.22)">${ico(kind, 22, 'rgb(' + c + ')')}</span>` : `<span class="lt-hic" style="background:rgba(255,255,255,0.1)">${ico(kind, 22, 'rgba(255,255,255,0.55)')}</span>`;
+        const tg = on ? `<span class="lt-tg" style="background:rgb(${c})"><i style="right:3px"></i></span>` : '<span class="lt-tg" style="background:rgba(255,255,255,0.18)"><i style="left:3px"></i></span>';
+        return `<div class="lt-head">${ic}<div><div class="lt-hn">${variables.name}</div><div class="lt-hs">${on ? 'On · ' + pctOf(entity) + '%' : 'Off'}</div></div>${tg}</div>`;
+      ]]]

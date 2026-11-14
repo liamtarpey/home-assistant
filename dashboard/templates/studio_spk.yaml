@@ -1,0 +1,87 @@
+studio_spk:
+  triggers_update:
+    - switch.office_studio_power_speakers_and_amps_yahama_msp5_left
+    - switch.office_studio_power_speakers_and_amps_yamaha_msp5_right
+    - sensor.office_power_yamaha_msp5_left_current_consumption
+    - sensor.office_power_yamaha_msp5_right_current_consumption
+    - binary_sensor.office_power_yamaha_msp5_left_overheated
+    - binary_sensor.office_power_yamaha_msp5_left_overloaded
+    - binary_sensor.office_power_yamaha_msp5_right_overheated
+    - binary_sensor.office_power_yamaha_msp5_right_overloaded
+  variables:
+    title_text: Studio speakers
+    sw_l: switch.office_studio_power_speakers_and_amps_yahama_msp5_left
+    sw_r: switch.office_studio_power_speakers_and_amps_yamaha_msp5_right
+    pw_l: sensor.office_power_yamaha_msp5_left_current_consumption
+    pw_r: sensor.office_power_yamaha_msp5_right_current_consumption
+    hot_l: binary_sensor.office_power_yamaha_msp5_left_overheated
+    over_l: binary_sensor.office_power_yamaha_msp5_left_overloaded
+    hot_r: binary_sensor.office_power_yamaha_msp5_right_overheated
+    over_r: binary_sensor.office_power_yamaha_msp5_right_overloaded
+  label: >
+    [[[
+      const sL = states[variables.sw_l]?.state, sR = states[variables.sw_r]?.state;
+      const ok = (s) => !!s && !['unavailable', 'unknown'].includes(s);
+      const bad = [states[variables.hot_l]?.state === 'on' && 'LEFT OVERHEATED', states[variables.over_l]?.state === 'on' && 'LEFT OVERLOADED', states[variables.hot_r]?.state === 'on' && 'RIGHT OVERHEATED', states[variables.over_r]?.state === 'on' && 'RIGHT OVERLOADED'].filter(Boolean);
+      if (bad.length) return '<span style="color:#ff6b5e;font-weight:700">' + bad.join(' · ') + '</span>';
+      if (!ok(sL) && !ok(sR)) return 'NOT REACHABLE';
+      const onL = sL === 'on', onR = sR === 'on';
+      if (!onL && !onR) return 'OFF';
+      const wl = parseFloat(states[variables.pw_l]?.state), wr = parseFloat(states[variables.pw_r]?.state);
+      const w = (onL && !isNaN(wl) ? wl : 0) + (onR && !isNaN(wr) ? wr : 0);
+      const has = (onL && !isNaN(wl)) || (onR && !isNaN(wr));
+      const dot = '<span class="live-wrap"><span class="live-ring"></span><span class="live-dot"></span></span>';
+      return dot + (onL && onR ? 'ON' : onL ? 'LEFT ON' : 'RIGHT ON') + (has ? ` · ${Math.round(w)} W` : '');
+    ]]]
+  name: >
+    [[[
+      const sL = states[variables.sw_l]?.state, sR = states[variables.sw_r]?.state;
+      const ok = (s) => !!s && !['unavailable', 'unknown'].includes(s);
+      if (!ok(sL) && !ok(sR)) return 'Speakers offline';
+      return (sL === 'on' || sR === 'on') ? 'Speakers on' : 'Speakers off';
+    ]]]
+  custom_fields:
+    art: >
+      [[[
+        const sL = states[variables.sw_l]?.state, sR = states[variables.sw_r]?.state;
+        const ok = (s) => !!s && !['unavailable', 'unknown'].includes(s);
+        const onL = sL === 'on', onR = sR === 'on', on = onL || onR;
+        const gone = !ok(sL) && !ok(sR);
+        const g = on ? 'rgba(61,220,132,' : 'rgba(61,220,132,';
+        const speaker = (x) => `<g transform="translate(${x},2)"><rect x="2" y="2" width="96" height="146" rx="10" fill="url(#cab)" style="stroke:rgba(255,255,255,0.10);stroke-width:1.5"/><rect x="7" y="7" width="86" height="136" rx="7" fill="none" style="stroke:rgba(255,255,255,0.05);stroke-width:1"/><circle cx="50" cy="28" r="15" fill="#0b0c0f"/><circle cx="50" cy="28" r="11" fill="url(#tw)"/><circle cx="46" cy="24" r="3" fill="#ffffff" opacity="0.5"/><circle cx="50" cy="92" r="38" fill="#0b0c0f"/><circle cx="50" cy="92" r="32" fill="url(#cone)" style="stroke:rgba(0,0,0,0.25);stroke-width:1"/><circle cx="50" cy="92" r="10" fill="url(#cap)"/></g>`;
+        const led = (x, o) => o
+          ? `<circle cx="${x}" cy="140" r="8" fill="rgba(61,220,132,0.35)"/><circle cx="${x}" cy="140" r="3" fill="#3ddc84"/>`
+          : `<circle cx="${x}" cy="140" r="3" fill="${gone ? '#5a2d2d' : '#2b2f36'}"/>`;
+        const rings = [[50, onL], [162, onR]].filter(r => r[1]).map(r => r[0]).map(cx => `<circle cx="${cx}" cy="94" r="58" fill="none" style="stroke:rgba(61,220,132,0.30);stroke-width:1.5"/><circle cx="${cx}" cy="94" r="68" fill="none" style="stroke:rgba(61,220,132,0.16);stroke-width:1.5"/>`).join('');
+        const glow = on ? 'radial-gradient(circle at 74% 38%, rgba(61,220,132,0.26) 0%, rgba(61,220,132,0) 62%)' : 'none';
+        const tone = on ? '' : 'filter:grayscale(0.35) brightness(0.85);';
+        return `<div class="sp-fx" style="background:${glow}"><svg class="sp-svg" viewBox="0 0 212 164" style="${tone}"><defs><linearGradient id="cab" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:#1d2027"/><stop offset="1" style="stop-color:#111318"/></linearGradient><radialGradient id="tw" cx="0.4" cy="0.35" r="0.7"><stop offset="0" style="stop-color:#d3dae2"/><stop offset="1" style="stop-color:#626b77"/></radialGradient><radialGradient id="cone" cx="0.4" cy="0.35" r="0.8"><stop offset="0" style="stop-color:#f6f8fa"/><stop offset="1" style="stop-color:#c9cfd6"/></radialGradient><radialGradient id="cap" cx="0.4" cy="0.35" r="0.8"><stop offset="0" style="stop-color:#e6eaee"/><stop offset="1" style="stop-color:#8f98a3"/></radialGradient></defs>${rings}${speaker(0)}${speaker(112)}${led(14, onL)}${led(126, onR)}</svg></div>`;
+      ]]]
+    cta:
+      card:
+        type: custom:button-card
+        template: glass_power_btn
+        triggers_update:
+          - switch.office_studio_power_speakers_and_amps_yahama_msp5_left
+          - switch.office_studio_power_speakers_and_amps_yamaha_msp5_right
+        variables:
+          is_off: "[[[ return !['switch.office_studio_power_speakers_and_amps_yahama_msp5_left', 'switch.office_studio_power_speakers_and_amps_yamaha_msp5_right'].some(i => states[i] && states[i].state === 'on'); ]]]"
+        tap_action:
+          action: perform-action
+          perform_action: homeassistant.toggle
+          target:
+            entity_id: "[[[ const ids = ['switch.office_studio_power_speakers_and_amps_yahama_msp5_left', 'switch.office_studio_power_speakers_and_amps_yamaha_msp5_right']; const on = ids.filter(i => states[i] && states[i].state === 'on'); return (on.length ? on : ids).join(','); ]]]"
+  extra_styles: |
+    .sp-fx { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+    .sp-fx::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0) 100%); pointer-events: none; }
+    .sp-svg { position: absolute; right: 16px; top: 44px; width: 212px; height: 164px; overflow: visible; }
+  styles:
+    custom_fields:
+      art:
+        - position: absolute
+        - top: 0
+        - left: 0
+        - right: 0
+        - bottom: 0
+        - z-index: 0
+        - pointer-events: none

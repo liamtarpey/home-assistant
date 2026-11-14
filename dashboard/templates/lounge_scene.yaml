@@ -1,0 +1,345 @@
+lounge_scene:
+  triggers_update: [scene.movie_mode, scene.party_mode, scene.sleep_mode, scene.off_mode, scene.pink_bright, scene.pink_dim, scene.green_bright, scene.green_dim, scene.blue_bright, scene.blue_dim, scene.red_bright, scene.red_dim, light.wiz_rgbw_tunable_181e98, light.lounge_lounge_candle, light.wiz_rgbw_tunable_19f62e, light.wiz_rgbw_tunable_1a3d76, light.lounge_lightstrip_left, light.lounge_lightstrip_right]
+  variables:
+    title_text: Lounge lights
+    bigicon_src: last
+    zelda_scene: scene.green_bright
+    dimmed: |
+      [[[
+        const L = ['light.wiz_rgbw_tunable_181e98', 'light.lounge_lounge_candle', 'light.wiz_rgbw_tunable_19f62e', 'light.wiz_rgbw_tunable_1a3d76', 'light.lounge_lightstrip_left', 'light.lounge_lightstrip_right'];
+        return !L.some(id => states[id] && states[id].state === 'on');
+      ]]]
+    last: |
+      [[[
+        const LIGHTS = ['light.wiz_rgbw_tunable_181e98', 'light.lounge_lounge_candle', 'light.wiz_rgbw_tunable_19f62e', 'light.wiz_rgbw_tunable_1a3d76', 'light.lounge_lightstrip_left', 'light.lounge_lightstrip_right'];
+        const list = [
+          ['movie_mode', 'Movie', 'Movie lights', 'mdi:movie-open', '#a855f7'],
+          ['party_mode', 'Party', 'Party lights', 'mdi:party-popper', '#ff4fa3'],
+          ['sleep_mode', 'Sleep', 'Sleep lights', 'mdi:weather-night', '#6366f1'],
+          ['off_mode', 'Off', 'Lights off', 'mdi:lightbulb-off', '#8b8f98'],
+          ['pink_bright', 'Pink bright', 'Bright pink lights', 'mdi:lightbulb-cfl', '#ff69b4'],
+          ['pink_dim', 'Pink dim', 'Dim pink lights', 'mdi:lightbulb-cfl', '#b4457f'],
+          ['green_bright', 'Zelda', 'Zelda lights', '', '#9ee37d'],
+          ['green_dim', 'Green dim', 'Dim green lights', 'mdi:lightbulb-cfl', '#168946'],
+          ['blue_bright', 'Blue bright', 'Bright blue lights', 'mdi:lightbulb-cfl', '#3b82f6'],
+          ['blue_dim', 'Blue dim', 'Dim blue lights', 'mdi:lightbulb-cfl', '#2655a0'],
+          ['red_bright', 'Red bright', 'Bright red lights', 'mdi:lightbulb-cfl', '#ff3b30'],
+          ['red_dim', 'Red dim', 'Dim red lights', 'mdi:lightbulb-cfl', '#a6261f']
+        ].map(a => ({id: 'scene.' + a[0], name: a[1], title: a[2], icon: a[3], color: a[4]}));
+        let best = null, t = 0;
+        for (const s of list) {
+          const v = Date.parse(states[s.id]?.state);
+          if (v && v > t) { t = v; best = s; }
+        }
+        const ls = LIGHTS.map(id => states[id]).filter(Boolean);
+        const on = ls.filter(s => s.state === 'on');
+        const latest = ls.reduce((m, s) => Math.max(m, Date.parse(s.last_updated) || 0), 0);
+        if (!ls.length) {
+          if (!best) return {name: 'Lounge scenes', title: 'Choose a scene', icon: 'mdi:palette', color: '#4da3ff', t: 0, off: true};
+          return Object.assign({}, best, {t: t, off: best.id === 'scene.off_mode'});
+        }
+        if (!on.length) return Object.assign({}, list[3], {t: latest || t, off: true});
+        if (best && best.id !== 'scene.off_mode' && latest <= t + 60000) return Object.assign({}, best, {t: t, off: false});
+        const cols = on.map(s => s.attributes.rgb_color).filter(Array.isArray);
+        const avg = cols.length ? [0, 1, 2].map(i => Math.round(cols.reduce((a, x) => a + x[i], 0) / cols.length)) : [255, 200, 140];
+        const hex = '#' + avg.map(v => v.toString(16).padStart(2, '0')).join('');
+        return {id: 'custom', name: 'Custom', title: 'Custom lights', icon: 'mdi:lightbulb-group', color: hex, t: latest, off: false, custom: true, n: on.length, total: ls.length};
+      ]]]
+  label: |
+    [[[
+      const l = variables.last;
+      if (!l.t) return '';
+      const dt = new Date(l.t);
+      const tm = dt.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+      const t0 = new Date();
+      const gap = Math.round((new Date(t0.getFullYear(), t0.getMonth(), t0.getDate()) - new Date(dt.getFullYear(), dt.getMonth(), dt.getDate())) / 86400000);
+      const when = gap === 0 ? tm : gap === 1 ? `YESTERDAY ${tm}` : `${dt.toLocaleDateString('en-GB', {weekday: 'short'}).toUpperCase()} ${tm}`;
+      if (l.off) return `OFF SINCE ${when}`;
+      const dot = '<span class="live-wrap"><span class="live-ring"></span><span class="live-dot"></span></span>';
+      if (l.custom) return `${dot}CUSTOM · ${l.n} OF ${l.total} ON`;
+      return `${dot}ON SINCE ${when}`;
+    ]]]
+  name: "[[[ return variables.last.title; ]]]"
+  custom_fields:
+    fx: |
+      [[[
+        const l = variables.last;
+        const c = l.color || '#4da3ff';
+        const on = !!l.t && !l.off;
+        const rnd = (n) => { let t = (n + 0x6D2B79F5) | 0; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+        const mix = (hex, k) => { const n = parseInt(hex.slice(1), 16); return '#' + [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => Math.round(v + (255 - v) * k).toString(16).padStart(2, '0')).join(''); };
+        const id = l.id || '';
+        const zid = variables.zelda_scene || 'scene.green_bright';
+        const kind = !on ? 'none' : id === zid ? 'zelda' : id === 'scene.movie_mode' ? 'movie' : id === 'scene.party_mode' ? 'party' : id === 'scene.sleep_mode' ? 'sleep' : 'wash';
+        const glowCls = kind === 'party' ? 'll-glow ll-hue' : (kind === 'sleep' || kind === 'wash') ? 'll-glow ll-breathe ll-slow' : 'll-glow';
+        let inner = `<div class="${glowCls}" style="background:radial-gradient(circle at 80% 15%, ${c}99 0%, ${c}00 60%)"></div>`;
+        if (kind === 'movie') {
+          inner += '<div class="ll-beam"></div>';
+          for (let i = 0; i < 9; i++) {
+            const dur = 5 + rnd(i * 5 + 3) * 4;
+            inner += `<i class="ll-dust" style="left:${(48 + rnd(i * 5 + 1) * 44).toFixed(1)}%;top:${(6 + rnd(i * 5 + 2) * 54).toFixed(1)}%;animation-duration:${dur.toFixed(1)}s;animation-delay:-${(rnd(i * 5 + 4) * dur).toFixed(1)}s"></i>`;
+          }
+        } else if (kind === 'party') {
+          const cols = ['#ff4fa3', '#ffd24a', '#3ddc84', '#4da3ff', '#a855f7'];
+          for (let i = 0; i < 16; i++) {
+            const w = 5 + Math.round(rnd(i * 7 + 2) * 3);
+            const h = 3 + Math.round(rnd(i * 7 + 3) * 2);
+            const dur = 5 + rnd(i * 7 + 4) * 4;
+            inner += `<i class="ll-cf" style="left:${(2 + rnd(i * 7 + 1) * 94).toFixed(1)}%;width:${w}px;height:${h}px;background:${cols[i % 5]};animation-duration:${dur.toFixed(1)}s;animation-delay:-${(rnd(i * 7 + 5) * dur).toFixed(1)}s"></i>`;
+          }
+        } else if (kind === 'sleep') {
+          for (let i = 0; i < 18; i++) {
+            const sz = [2, 2, 3, 3, 4][Math.floor(rnd(i * 6 + 3) * 5)];
+            const dur = 3 + rnd(i * 6 + 4) * 4;
+            inner += `<i class="ll-star" style="left:${(3 + rnd(i * 6 + 1) * 93).toFixed(1)}%;top:${(4 + rnd(i * 6 + 2) * 54).toFixed(1)}%;width:${sz}px;height:${sz}px;animation-duration:${dur.toFixed(1)}s;animation-delay:-${(rnd(i * 6 + 5) * dur).toFixed(1)}s"></i>`;
+          }
+        } else if (kind === 'wash') {
+          inner += `<div class="ll-blob ll-d1" style="left:58%;top:-22%;width:250px;height:250px;background:${c}8c"></div>`;
+          inner += `<div class="ll-blob ll-d2" style="left:-10%;top:28%;width:220px;height:220px;background:${mix(c, 0.35)}66"></div>`;
+          inner += `<div class="ll-blob ll-d3" style="left:30%;top:58%;width:200px;height:200px;background:${c}52"></div>`;
+        } else if (kind === 'zelda') {
+          const P1 = 'M60 150 C 110 70, 170 38, 232 88 S 342 168, 392 100 S 330 24, 262 58 S 130 196, 60 150 Z';
+          const P2 = 'M372 126 C 340 62, 272 28, 216 56 S 126 118, 168 152 S 306 172, 372 126 Z';
+          const f1 = (n) => n.toFixed(1), f0 = (n) => n.toFixed(0);
+          inner = '<div class="zl-bg"></div>';
+          [[150, 38, 9, 0], [215, 70, 8, 2], [275, 34, 11, 5], [330, 60, 7, 3], [390, 30, 10, 1]].forEach(r => {
+            inner += `<div class="zl-ray" style="left:${r[0]}px;width:${r[1]}px;animation-duration:${r[2]}s;animation-delay:-${r[3]}s"></div>`;
+          });
+          inner += '<div class="zl-mist" style="top:96px;animation-duration:30s"></div><div class="zl-mist" style="top:150px;animation-duration:40s;animation-delay:-17s;opacity:0.85"></div>';
+          for (let i = 0; i < 16; i++) {
+            const sz = 2.5 + rnd(i * 7 + 1) * 3.5;
+            inner += `<i class="zl-mote" style="left:${f0(120 + rnd(i * 7 + 2) * 310)}px;top:${f0(20 + rnd(i * 7 + 3) * 170)}px;width:${f1(sz)}px;height:${f1(sz)}px;--dx:${[-20, -10, 12, 24][Math.floor(rnd(i * 7 + 4) * 4)]}px;animation-duration:${f1(7 + rnd(i * 7 + 5) * 7)}s;animation-delay:-${f1(rnd(i * 7 + 6) * 12)}s"></i>`;
+          }
+          const bkc = ['rgba(255,236,150,0.5)', 'rgba(150,255,210,0.4)', 'rgba(255,255,255,0.35)'];
+          for (let i = 0; i < 7; i++) {
+            const sz = 10 + rnd(i * 5 + 101) * 16;
+            inner += `<i class="zl-bk" style="left:${f0(rnd(i * 5 + 102) * 420)}px;top:${f0(10 + rnd(i * 5 + 103) * 190)}px;width:${f0(sz)}px;height:${f0(sz)}px;background:radial-gradient(circle,${bkc[i % 3]},transparent 70%);animation-duration:${f1(6 + rnd(i * 5 + 104) * 5)}s;animation-delay:-${f1(rnd(i * 5 + 105) * 9)}s"></i>`;
+          }
+          for (let i = 0; i < 9; i++) {
+            inner += `<i class="zl-fly" style="left:${f0(20 + rnd(i * 4 + 201) * 400)}px;top:${f0(30 + rnd(i * 4 + 202) * 155)}px;animation-duration:${f1(3.4 + rnd(i * 4 + 203) * 3.1)}s;animation-delay:-${f1(rnd(i * 4 + 204) * 6)}s"></i>`;
+          }
+          [[62, 44, 11, 3.2, 0], [340, 96, 9, 4, 1.4], [118, 140, 8, 3.6, 2.1], [276, 38, 10, 4.4, 0.7], [402, 168, 8, 3.1, 1.8], [30, 128, 7, 5, 2.6], [232, 150, 9, 4.2, 3.3]].forEach(s => {
+            inner += `<i class="zl-st" style="left:${s[0]}px;top:${s[1]}px;width:${s[2]}px;height:${s[2]}px;animation-duration:${s[3]}s;animation-delay:-${s[4]}s"></i>`;
+          });
+          const fairy = (path, dur, delay, color, glow, size, trail, step) => {
+            let o = '';
+            for (let k = trail; k > 0; k--) {
+              const s = size * (1 - k / (trail + 2)) * 0.9, a = (1 - k / (trail + 1)) * 0.65;
+              o += `<div class="zl-fz" style="offset-path:path('${path}');animation-duration:${dur}s;animation-delay:${(-delay + k * step).toFixed(2)}s"><i class="zl-core" style="left:${f1(-s / 2)}px;top:${f1(-s / 2)}px;width:${f1(s)}px;height:${f1(s)}px;background:radial-gradient(circle,#fff,${color} 55%,transparent 75%);opacity:${a.toFixed(2)};box-shadow:0 0 ${f0(s * 1.4)}px ${f0(s / 2)}px ${glow}55"></i></div>`;
+            }
+            o += `<div class="zl-fz" style="offset-path:path('${path}');animation-duration:${dur}s;animation-delay:${-delay}s"><i class="zl-wing zl-wl"></i><i class="zl-wing zl-wr"></i><i class="zl-core" style="left:${-size / 2}px;top:${-size / 2}px;width:${size}px;height:${size}px;background:radial-gradient(circle,#fff 0 40%,${color} 64%,transparent 76%);box-shadow:0 0 6px 2px #fff,0 0 ${size * 2}px ${size}px ${glow}aa"></i></div>`;
+            return o;
+          };
+          inner += fairy(P1, 26, 0, '#bfe8ff', '#7cc8ff', 15, 7, 0.28) + fairy(P2, 21, 9, '#fff0b0', '#ffd45a', 10, 6, 0.3);
+          const tri = (pts) => `<polygon points="${pts}" fill="url(#zltg)" stroke="#fff0a8" stroke-opacity="0.75" stroke-width="1" stroke-linejoin="round"/>`;
+          inner += `<div class="zl-halo"></div><svg class="zl-tri" viewBox="0 0 100 90" aria-hidden="true" style="filter:drop-shadow(0 0 7px rgba(255,214,90,0.9)) drop-shadow(0 0 18px rgba(255,190,60,0.55))"><defs><linearGradient id="zltg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#fff6c0"/><stop offset="0.5" stop-color="#f6c94e"/><stop offset="1" stop-color="#c98a1c"/></linearGradient></defs>${tri('50,5 28,44 72,44')}${tri('28,46 6,85 50,85')}${tri('72,46 50,85 94,85')}</svg>`;
+        }
+        return `<div class="ll-fx">${inner}</div>`;
+      ]]]
+    cta:
+      card:
+        type: custom:button-card
+        template: glass_power_btn
+        triggers_update: [scene.movie_mode, scene.party_mode, scene.sleep_mode, scene.off_mode, scene.pink_bright, scene.pink_dim, scene.green_bright, scene.green_dim, scene.blue_bright, scene.blue_dim, scene.red_bright, scene.red_dim, light.wiz_rgbw_tunable_181e98, light.lounge_lounge_candle, light.wiz_rgbw_tunable_19f62e, light.wiz_rgbw_tunable_1a3d76, light.lounge_lightstrip_left, light.lounge_lightstrip_right]
+        variables:
+          is_off: |
+            [[[
+              const L = ['light.wiz_rgbw_tunable_181e98', 'light.lounge_lounge_candle', 'light.wiz_rgbw_tunable_19f62e', 'light.wiz_rgbw_tunable_1a3d76', 'light.lounge_lightstrip_left', 'light.lounge_lightstrip_right'];
+              return !L.some(id => states[id] && states[id].state === 'on');
+            ]]]
+        tap_action:
+          action: perform-action
+          perform_action: scene.turn_on
+          target:
+            entity_id: |
+              [[[
+                const L = ['light.wiz_rgbw_tunable_181e98', 'light.lounge_lounge_candle', 'light.wiz_rgbw_tunable_19f62e', 'light.wiz_rgbw_tunable_1a3d76', 'light.lounge_lightstrip_left', 'light.lounge_lightstrip_right'];
+                return L.some(id => states[id] && states[id].state === 'on') ? 'scene.off_mode' : 'scene.movie_mode';
+              ]]]
+    scenes:
+      card:
+        type: custom:button-card
+        show_name: false
+        show_icon: false
+        styles:
+          card:
+            - width: 626px
+            - height: 46px
+            - padding: 0 16px 0 0
+            - box-sizing: content-box
+            - background: none
+            - border: none
+            - box-shadow: none
+            - border-radius: 0
+            - overflow: visible
+          grid:
+            - grid-template-areas: '"row"'
+          custom_fields:
+            row:
+              - width: 626px
+              - height: 46px
+              - "--stack-card-gap": 12px
+        custom_fields:
+          row:
+            card:
+              type: horizontal-stack
+              cards:
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:movie-open
+                  variables:
+                    id: scene.movie_mode
+                    color: '#a855f7'
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:party-popper
+                  variables:
+                    id: scene.party_mode
+                    color: '#ff4fa3'
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:weather-night
+                  variables:
+                    id: scene.sleep_mode
+                    color: '#6366f1'
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:circle
+                  variables:
+                    id: scene.pink_bright
+                    color: '#ff69b4'
+                    icon_size: 26px
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:circle
+                  variables:
+                    id: scene.pink_dim
+                    color: '#b4457f'
+                    icon_size: 26px
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:circle
+                  variables:
+                    id: scene.green_bright
+                    color: '#22d36b'
+                    icon_size: 26px
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:circle
+                  variables:
+                    id: scene.green_dim
+                    color: '#168946'
+                    icon_size: 26px
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:circle
+                  variables:
+                    id: scene.blue_bright
+                    color: '#3b82f6'
+                    icon_size: 26px
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:circle
+                  variables:
+                    id: scene.blue_dim
+                    color: '#2655a0'
+                    icon_size: 26px
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:circle
+                  variables:
+                    id: scene.red_bright
+                    color: '#ff3b30'
+                    icon_size: 26px
+                - type: custom:button-card
+                  template: scene_btn
+                  icon: mdi:circle
+                  variables:
+                    id: scene.red_dim
+                    color: '#a6261f'
+                    icon_size: 26px
+  extra_styles: |
+    .ll-fx {position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;}
+    .ll-fx::after {content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to top,rgba(0,0,0,1) 0%,rgba(0,0,0,0.85) 35%,rgba(0,0,0,0) 100%);pointer-events:none;}
+    .ll-glow {position:absolute;top:0;left:0;right:0;bottom:0;transform-origin:80% 15%;}
+    .ll-breathe {animation:ll-breathe 6s ease-in-out infinite;}
+    .ll-slow {animation-duration:9s;}
+    .ll-hue {animation:ll-hue 9s linear infinite;}
+    .ll-blob {position:absolute;border-radius:50%;filter:blur(42px);}
+    .ll-d1 {animation:ll-d1 15s ease-in-out infinite alternate;}
+    .ll-d2 {animation:ll-d2 19s ease-in-out -6s infinite alternate;}
+    .ll-d3 {animation:ll-d3 23s ease-in-out -10s infinite alternate;}
+    .ll-star {position:absolute;border-radius:50%;background:#ffe27a;box-shadow:0 0 5px rgba(255,226,122,0.7);opacity:0.2;animation:ll-twinkle 5s ease-in-out infinite;}
+    .ll-cf {position:absolute;top:-12px;border-radius:1px;opacity:0;animation:ll-cf 7s linear infinite;}
+    .ll-beam {position:absolute;top:0;right:0;width:330px;height:250px;transform-origin:96% 0;background:linear-gradient(to bottom left,rgba(225,200,255,0.5),rgba(225,200,255,0) 75%);clip-path:polygon(90% 0,100% 0,52% 100%,0 100%);animation:ll-beam 8s ease-in-out infinite;}
+    .ll-dust {position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(240,225,255,0.9);opacity:0;animation:ll-dust 7s ease-in-out infinite;}
+    @keyframes ll-breathe {0%,100% {opacity:0.7;transform:scale(1);} 50% {opacity:1;transform:scale(1.12);}}
+    @keyframes ll-iconp {0%,100% {transform:scale(1);opacity:0.75;} 50% {transform:scale(1.07);opacity:1;}}
+    @keyframes ll-hue {from {filter:hue-rotate(0deg);} to {filter:hue-rotate(360deg);}}
+    @keyframes ll-d1 {from {transform:translate(0,0) scale(1);} to {transform:translate(-100px,60px) scale(1.4);}}
+    @keyframes ll-d2 {from {transform:translate(0,0) scale(1.1);} to {transform:translate(110px,-50px) scale(0.85);}}
+    @keyframes ll-d3 {from {transform:translate(0,0) scale(0.9);} to {transform:translate(-70px,-80px) scale(1.35);}}
+    @keyframes ll-twinkle {0%,100% {opacity:0.15;transform:scale(0.8);} 50% {opacity:1;transform:scale(1.5);}}
+    @keyframes ll-cf {0% {transform:translateY(0) rotate(0deg);opacity:0;} 10% {opacity:0.85;} 85% {opacity:0.85;} 100% {transform:translateY(270px) rotate(420deg);opacity:0;}}
+    @keyframes ll-beam {0%,100% {opacity:0.45;transform:rotate(-3deg);} 50% {opacity:0.85;transform:rotate(3deg);}}
+    @keyframes ll-dust {0% {transform:translate(0,0);opacity:0;} 25% {opacity:0.8;} 100% {transform:translate(-26px,-44px);opacity:0;}}
+    .zl-bg {position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 72% -8%,rgba(255,236,160,0.6) 0%,rgba(255,236,160,0) 56%),radial-gradient(circle at 4% -6%,rgba(2,24,10,0.55) 0%,rgba(2,24,10,0) 42%),linear-gradient(165deg,#06281f 0%,#0d4a33 44%,#08301f 100%);}
+    .zl-ray {position:absolute;top:-40px;height:340px;border-radius:30px;background:linear-gradient(to bottom,rgba(255,238,160,0.6),rgba(255,238,160,0));filter:blur(8px);transform-origin:50% 0;animation:zl-ray ease-in-out infinite;}
+    .zl-mote {position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,240,180,0.75),rgba(255,240,180,0) 70%);animation:zl-mote linear infinite;}
+    .zl-bk {position:absolute;border-radius:50%;filter:blur(1.5px);animation:zl-bk ease-in-out infinite;}
+    .zl-fly {position:absolute;width:3px;height:3px;border-radius:50%;background:#f4ffb0;box-shadow:0 0 8px 2px rgba(220,255,130,0.85);opacity:0;animation:zl-fly ease-in-out infinite;}
+    .zl-mist {position:absolute;width:400px;height:90px;background:radial-gradient(ellipse,rgba(190,255,230,0.22),rgba(190,255,230,0) 70%);filter:blur(12px);animation:zl-mist linear infinite;}
+    .zl-st {position:absolute;background:#fff;clip-path:polygon(50% 0,58% 38%,100% 50%,58% 62%,50% 100%,42% 62%,0 50%,42% 38%);filter:drop-shadow(0 0 3px rgba(255,255,255,0.9));animation:zl-tw ease-in-out infinite;}
+    .zl-fz {position:absolute;top:0;left:0;width:0;height:0;offset-rotate:0deg;animation:zl-travel linear infinite;}
+    .zl-core {position:absolute;border-radius:50%;}
+    .zl-wing {position:absolute;width:15px;height:9px;top:-12px;background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(255,255,255,0.08));border-radius:90% 0 90% 0;filter:blur(0.3px);}
+    .zl-wl {left:-15px;transform-origin:100% 100%;animation:zl-flapl 0.34s ease-in-out infinite alternate;}
+    .zl-wr {right:-15px;transform-origin:0 100%;animation:zl-flapr 0.34s ease-in-out infinite alternate;}
+    .zl-tri {position:absolute;top:36px;right:66px;width:118px;height:108px;animation:zl-float 6s ease-in-out infinite;}
+    .zl-halo {position:absolute;top:18px;right:30px;width:170px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,214,90,0.5),rgba(255,214,90,0) 66%);animation:zl-halo 4.5s ease-in-out infinite;}
+    @keyframes zl-ray {0%,100% {opacity:0.32;transform:rotate(16deg);} 50% {opacity:0.78;transform:rotate(21deg);}}
+    @keyframes zl-mote {0% {opacity:0;transform:translate(0,0);} 15% {opacity:0.9;} 60% {opacity:0.7;} 100% {opacity:0;transform:translate(var(--dx),-70px);}}
+    @keyframes zl-bk {0%,100% {opacity:0.15;transform:translate(0,0) scale(1);} 50% {opacity:0.7;transform:translate(10px,-16px) scale(1.15);}}
+    @keyframes zl-fly {0%,100% {opacity:0;transform:translate(0,0);} 25% {opacity:1;} 50% {opacity:0.3;transform:translate(10px,-12px);} 75% {opacity:1;}}
+    @keyframes zl-mist {from {transform:translateX(-440px);} to {transform:translateX(500px);}}
+    @keyframes zl-tw {0%,100% {opacity:0.1;transform:scale(0.4);} 50% {opacity:1;transform:scale(1);}}
+    @keyframes zl-travel {from {offset-distance:0%;} to {offset-distance:100%;}}
+    @keyframes zl-flapl {from {transform:rotate(-38deg);} to {transform:rotate(10deg);}}
+    @keyframes zl-flapr {from {transform:scaleX(-1) rotate(-38deg);} to {transform:scaleX(-1) rotate(10deg);}}
+    @keyframes zl-float {0%,100% {transform:translateY(0);} 50% {transform:translateY(-5px);}}
+    @keyframes zl-halo {0%,100% {opacity:0.55;transform:scale(1);} 50% {opacity:1;transform:scale(1.1);}}
+  styles:
+    custom_fields:
+      fx:
+        - position: absolute
+        - top: 0
+        - left: 0
+        - right: 0
+        - bottom: 0
+        - z-index: 0
+        - overflow: hidden
+        - pointer-events: none
+      bigicon:
+        - transform-origin: 50% 50%
+        - filter: "[[[ return (variables.last.id || '').endsWith('_dim') ? 'opacity(0.55)' : 'none'; ]]]"
+        - animation: "[[[ return variables.last.off ? 'none' : 'll-iconp 6s ease-in-out infinite'; ]]]"
+      scenes:
+        - position: absolute
+        - left: 22px
+        - right: 22px
+        - bottom: 20px
+        - height: 46px
+        - z-index: 3
+        - overflow-x: auto
+        - overflow-y: hidden
+        - overscroll-behavior-x: contain
+        - scrollbar-width: none
+        - -webkit-overflow-scrolling: touch
+        - -webkit-mask-image: "linear-gradient(to right, #000 0, #000 calc(100% - 16px), transparent 100%)"
+        - mask-image: "linear-gradient(to right, #000 0, #000 calc(100% - 16px), transparent 100%)"
+    grid:
+      - grid-template-areas: '"." "l" "n"'
+      - grid-template-rows: 1fr min-content min-content
+      - position: relative
+    name:
+      - padding: 0 22px 82px 22px

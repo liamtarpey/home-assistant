@@ -1,0 +1,8 @@
+glass_cta:
+  styles:
+    custom_fields:
+      cta:
+        - position: absolute
+        - top: 16px
+        - right: 20px
+        - z-index: 4

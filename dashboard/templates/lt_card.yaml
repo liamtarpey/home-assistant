@@ -1,0 +1,59 @@
+lt_card:
+  show_name: false
+  show_icon: false
+  tap_action:
+    action: none
+  styles:
+    card:
+      - min-height: 196px
+      - filter: "[[[ return entity && entity.state === 'on' ? 'none' : 'grayscale(0.4)'; ]]]"
+    grid:
+      - grid-template-areas: '"head" "bri" "sw"'
+      - grid-template-columns: minmax(0, 1fr)
+      - grid-template-rows: min-content min-content min-content
+      - align-content: start
+    custom_fields:
+      fx:
+        - position: absolute
+        - top: 0
+        - left: 0
+        - right: 0
+        - bottom: 0
+        - pointer-events: none
+      head:
+        - position: relative
+        - z-index: 3
+        - justify-self: stretch
+        - min-width: 0
+      bri:
+        - position: relative
+        - z-index: 3
+        - justify-self: stretch
+        - min-width: 0
+        - text-align: left
+        - margin: 10px 12px 0 12px
+        - height: 56px
+        - overflow: hidden
+        - --ha-card-background: transparent
+        - --card-background-color: transparent
+        - --ha-card-box-shadow: none
+        - --ha-card-border-width: 0px
+      sw:
+        - position: relative
+        - z-index: 3
+        - justify-self: start
+        - box-sizing: content-box
+        - width: 310px
+        - padding: 12px 22px 20px 22px
+        - --stack-card-gap: 10px
+  custom_fields:
+    fx: |
+      [[[
+        const IC = variables.icons;
+        const ico = (kind, size, col) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" fill="${col}">${IC[kind] || IC.lamp}</svg>`;
+        const rgbOf = (en) => (en && en.attributes && Array.isArray(en.attributes.rgb_color)) ? en.attributes.rgb_color : [255, 200, 140];
+        const pctOf = (en) => Math.round(((en && en.attributes && en.attributes.brightness) || 0) / 255 * 100);
+        if (!entity || entity.state !== 'on') return '';
+        const c = rgbOf(entity).slice(0, 3).join(',');
+        return `<div class="lt-glow" style="background:radial-gradient(circle at 92% 0%, rgba(${c},0.3) 0%, rgba(${c},0) 60%)"></div>`;
+      ]]]

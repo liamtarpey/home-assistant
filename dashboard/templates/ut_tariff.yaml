@@ -1,0 +1,27 @@
+ut_tariff:
+  triggers_update: [sensor.electricity_cost_this_month, sensor.gas_cost_this_month, sensor.electricity_usage_this_month, sensor.gas_usage_this_month]
+  custom_fields:
+    body: |
+      [[[
+        const num = (v) => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
+        const st = (id) => states[id] ? states[id].state : undefined;
+        const pick = (re) => { const k = Object.keys(states).find(id => re.test(id)); return k ? states[k].state : undefined; };
+        const d = new Date();
+        const day = d.getDate();
+        const dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        const e = num(st('sensor.electricity_cost_this_month'));
+        const g = num(st('sensor.gas_cost_this_month'));
+        const W = 56;
+        const total = e + g + W;
+        const pct = (x) => total > 0 ? Math.round(x / total * 100) : 0;
+        const gbp = (x) => '£' + x.toFixed(2);
+        const dot = '<span class="ut-dw"><span class="ut-dr"></span><span class="ut-dc"></span></span>';
+        const er = num(pick(/^sensor\.octopus_energy_electricity_.*_current_rate$/)) * 100;
+        const es = num(pick(/^sensor\.octopus_energy_electricity_.*_current_standing_charge$/)) * 100;
+        const gr = num(pick(/^sensor\.octopus_energy_gas_.*_current_rate$/)) * 100;
+        const gs = num(pick(/^sensor\.octopus_energy_gas_.*_current_standing_charge$/)) * 100;
+        const row = (name, col, rgb, path, rate, stand) => `<div class="ut-trow"><span class="ut-tico" style="background:rgba(${rgb},0.16);color:${col}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="${path}" fill="currentColor"/></svg></span><div><div class="ut-tn">${name}</div><div class="ut-ts">Standing charge ${stand.toFixed(1)}p / day</div></div><div class="ut-tr"><b>${rate.toFixed(1)}</b><span>p/kWh</span></div></div>`;
+        return `<div class="ut" style="min-height:230px"><div class="ut-glow" style="background:radial-gradient(circle at 92% 6%, rgba(61,220,132,0.2) 0%, rgba(61,220,132,0) 58%)"></div>`
+          + `<div class="ut-head"><span class="ut-ttl">Tariff · right now</span><span class="ut-upd">${dot}Live</span></div>`
+          + row('Electricity', '#ffb020', '255,176,32', 'M7,2V13H10V22L17,10H13L17,2H7Z', er, es) + row('Gas', '#ff7a45', '255,122,69', 'M12 2c1 3-2 5-2 8a3 3 0 0 0 6 0c0-1-.5-2-1-3 2 1.5 3 4 3 6a6 6 0 0 1-12 0c0-4 4-7 6-11z', gr, gs) + `</div>`;
+      ]]]

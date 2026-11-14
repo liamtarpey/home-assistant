@@ -1,0 +1,72 @@
+studio_wal:
+  triggers_update:
+    - switch.office_studio_power_speakers_and_amps_little_walter_22w
+    - binary_sensor.office_power_little_walter_22w_overheated
+    - binary_sensor.office_power_little_walter_22w_overloaded
+    - sensor.office_power_little_walter_22w_current_consumption
+  variables:
+    title_text: Little Walter 22W
+    sw: switch.office_studio_power_speakers_and_amps_little_walter_22w
+    pw: sensor.office_power_little_walter_22w_current_consumption
+    hot: binary_sensor.office_power_little_walter_22w_overheated
+    over: binary_sensor.office_power_little_walter_22w_overloaded
+    input: "INPUT: 23A"
+  label: >
+    [[[
+      const bad = states[variables.hot]?.state === 'on' ? 'OVERHEATED' : states[variables.over]?.state === 'on' ? 'OVERLOADED' : '';
+      if (bad) return '<span style="color:#ff6b5e;font-weight:700">' + bad + '</span>';
+      const inp = variables.input ? ` · ${variables.input}` : '';
+      const st = states[variables.sw]?.state;
+      if (!st || ['unavailable', 'unknown'].includes(st)) return 'NOT REACHABLE' + inp;
+      if (st !== 'on') return 'OFF' + inp;
+      const w = parseFloat(states[variables.pw]?.state);
+      const dot = '<span class="live-wrap"><span class="live-ring"></span><span class="live-dot"></span></span>';
+      return dot + (isNaN(w) ? 'ON' : `ON · ${Math.round(w)} W`) + inp;
+    ]]]
+  name: >
+    [[[
+      const st = states[variables.sw]?.state;
+      if (!st || ['unavailable', 'unknown'].includes(st)) return 'Little Walter 22W offline';
+      return st === 'on' ? 'Little Walter 22W on' : 'Little Walter 22W off';
+    ]]]
+  custom_fields:
+    art: >
+      [[[
+        const st = states[variables.sw]?.state;
+        const on = st === 'on';
+        const defs = `<defs><linearGradient id="tweed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcc184"/><stop offset="1" stop-color="#b99a5c"/></linearGradient><linearGradient id="alu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7dade"/><stop offset="1" stop-color="#9aa0a8"/></linearGradient><linearGradient id="leather" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b4528"/><stop offset="1" stop-color="#4a2e18"/></linearGradient><linearGradient id="brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0c067"/><stop offset="1" stop-color="#a8842f"/></linearGradient><pattern id="twp" width="8" height="6" patternUnits="userSpaceOnUse"><path d="M1 0V6" style="stroke:rgba(100,62,22,0.22);stroke-width:0.9"/><path d="M0 3H8" style="stroke:rgba(100,62,22,0.09);stroke-width:0.8"/></pattern></defs>`;
+        const base = `<rect x="92" y="1" width="76" height="11" rx="5.5" fill="url(#leather)" stroke="rgba(0,0,0,0.4)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><rect x="84" y="4" width="12" height="8" rx="2" fill="#b3a67f" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="164" y="4" width="12" height="8" rx="2" fill="#b3a67f" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="14" y="10" width="232" height="124" rx="6" fill="url(#tweed)" stroke="rgba(60,35,10,0.6)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><rect x="14" y="10" width="232" height="124" rx="6" fill="url(#twp)"/><rect x="19" y="15" width="222" height="114" rx="4" fill="none" stroke="rgba(80,50,20,0.40)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><rect x="28" y="20" width="204" height="32" rx="3" fill="url(#alu)" stroke="rgba(0,0,0,0.40)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="44" cy="36" r="4.2" fill="#171717" stroke="#6c7077" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="62" cy="36" r="4.2" fill="#171717" stroke="#6c7077" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="108" cy="36" r="10" fill="#161616" stroke="rgba(0,0,0,0.5)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="108" cy="36" r="7" fill="#2b2b2e"/><line x1="108" y1="36" x2="101.87164445504817" y2="30.857699122507686" stroke="#f1efe8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="140" cy="36" r="10" fill="#161616" stroke="rgba(0,0,0,0.5)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="140" cy="36" r="7" fill="#2b2b2e"/><line x1="140" y1="36" x2="142.73616114660535" y2="28.482459033712733" stroke="#f1efe8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="172" cy="36" r="10" fill="#161616" stroke="rgba(0,0,0,0.5)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="172" cy="36" r="7" fill="#2b2b2e"/><line x1="172" y1="36" x2="178.55321635431193" y2="31.41138850919163" stroke="#f1efe8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="214" cy="36" r="6" fill="#3a1a10" stroke="rgba(0,0,0,0.5)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="214" cy="36" r="3.2" fill="#6a2a16"/><rect x="78" y="88" width="104" height="28" rx="3" fill="url(#brass)" stroke="rgba(60,40,10,0.6)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><rect x="82" y="92" width="96" height="20" rx="2" fill="none" stroke="rgba(60,40,10,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><text x="130" y="106" style="font-family:Georgia, 'Times New Roman', serif;font-size:10px;font-weight:700;letter-spacing:1.4px;fill:#3a2a0c;text-anchor:middle">LITTLE WALTER</text>`;
+        const lit = `<circle cx="214" cy="36" r="16" fill="rgba(255,150,50,0.20)"/><circle cx="214" cy="36" r="10.5" fill="rgba(255,150,50,0.32)"/><circle cx="214" cy="36" r="6" fill="#ff7a2e" stroke="rgba(255,255,255,0.4)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="212.6" cy="34.6" r="1.9" fill="#ffe3c8"/>`;
+        const glow = on ? 'radial-gradient(circle at 70% 40%, rgba(255,170,60,0.28) 0%, rgba(255,170,60,0) 62%)' : 'none';
+        const tone = on ? '' : 'filter:grayscale(0.35) brightness(0.85);';
+        return `<div class="amp-fx" style="background:${glow}"><svg class="amp-svg" viewBox="0 0 260 140" style="${tone}">${defs}${base}${on ? lit : ''}</svg></div>`;
+      ]]]
+    cta:
+      card:
+        type: custom:button-card
+        template: glass_power_btn
+        triggers_update:
+          - switch.office_studio_power_speakers_and_amps_little_walter_22w
+        variables:
+          is_off: "[[[ return states['switch.office_studio_power_speakers_and_amps_little_walter_22w']?.state !== 'on'; ]]]"
+        tap_action:
+          action: perform-action
+          perform_action: switch.toggle
+          target:
+            entity_id: switch.office_studio_power_speakers_and_amps_little_walter_22w
+  extra_styles: |
+    .amp-fx { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+    .amp-fx::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0) 100%); pointer-events: none; }
+    .amp-svg { position: absolute; right: 16px; top: 60px; width: 236px; height: 127px; overflow: visible; }
+  styles:
+    custom_fields:
+      art:
+        - position: absolute
+        - top: 0
+        - left: 0
+        - right: 0
+        - bottom: 0
+        - z-index: 0
+        - pointer-events: none
+    name:
+      - font-size: 26px

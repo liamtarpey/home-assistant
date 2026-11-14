@@ -1,0 +1,26 @@
+studio_page:
+  styles:
+    grid:
+      - grid-template-areas: '"hero hero side" "a b c"'
+  custom_fields:
+    hero:
+      card: {type: custom:button-card, template: [studio_hero, glass_cta]}
+    side:
+      card:
+        type: custom:button-card
+        template: [studio_strip]
+        custom_fields:
+          r1:
+            card: {type: custom:button-card, template: [studio_row], entity: switch.office_studio_power_speakers_and_amps_yahama_msp5_left, variables: {name: 'Yamaha MSP5 Left', color: '#3ddc84', pw: 'sensor.office_power_yamaha_msp5_left_current_consumption', kwh: 'sensor.office_power_yamaha_msp5_left_today_s_consumption', hot: 'binary_sensor.office_power_yamaha_msp5_left_overheated', over: 'binary_sensor.office_power_yamaha_msp5_left_overloaded'}}
+          r2:
+            card: {type: custom:button-card, template: [studio_row], entity: switch.office_studio_power_speakers_and_amps_yamaha_msp5_right, variables: {name: 'Yamaha MSP5 Right', color: '#3ddc84', pw: 'sensor.office_power_yamaha_msp5_right_current_consumption', kwh: 'sensor.office_power_yamaha_msp5_right_today_s_consumption', hot: 'binary_sensor.office_power_yamaha_msp5_right_overheated', over: 'binary_sensor.office_power_yamaha_msp5_right_overloaded'}}
+          r3:
+            card: {type: custom:button-card, template: [studio_row], entity: switch.office_studio_power_speakers_and_amps_evh_5150iii, variables: {name: 'EVH 5150III', color: '#ff3b30', pw: 'sensor.office_power_evh_5150iii_current_consumption', kwh: 'sensor.office_power_evh_5150iii_today_s_consumption', hot: 'binary_sensor.office_power_evh_5150iii_overheated', over: 'binary_sensor.office_power_evh_5150iii_overloaded'}}
+          r4:
+            card: {type: custom:button-card, template: [studio_row], entity: switch.office_studio_power_speakers_and_amps_little_walter_22w, variables: {name: 'Little Walter 22W', color: '#ffb347', pw: 'sensor.office_power_little_walter_22w_current_consumption', kwh: 'sensor.office_power_little_walter_22w_today_s_consumption', hot: 'binary_sensor.office_power_little_walter_22w_overheated', over: 'binary_sensor.office_power_little_walter_22w_overloaded'}}
+    a:
+      card: {type: custom:button-card, template: [glass_card, glass_title, glass_cta, studio_spk]}
+    b:
+      card: {type: custom:button-card, template: [glass_card, glass_title, glass_cta, studio_evh]}
+    c:
+      card: {type: custom:button-card, template: [glass_card, glass_title, glass_cta, studio_wal]}

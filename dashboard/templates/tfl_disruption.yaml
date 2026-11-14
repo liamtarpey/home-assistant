@@ -1,0 +1,20 @@
+tfl_disruption:
+  custom_fields:
+    body: |
+      [[[
+        const L = variables.lines;
+        const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const isGood = (s) => s === 'Good Service';
+        const isGone = (s) => !s || s === 'unavailable' || s === 'unknown';
+        const isRed = (s) => /severe|suspend|closed/i.test(s) && !/part|planned/i.test(s);
+        const st = entity ? entity.state : 'unknown';
+        const desc = entity && entity.attributes ? (entity.attributes.Description || '') : '';
+        const col = isRed(st) ? '#ff6b5e' : '#ffb020';
+        const h = String(variables.color || '#888888').replace('#', '');
+        const rgb = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)).join(',');
+        return `<div class="tf"><div class="tf-glow" style="background:radial-gradient(circle at 84% 8%, rgba(${rgb},0.42) 0%, rgba(${rgb},0) 60%)"></div>`
+          + `<div class="tf-hr"><img src="/local/svg/tfl/roundel-${variables.img}-no-text.svg" alt=""><span class="tf-ttl">${esc(variables.line)}</span>`
+          + `<span class="tf-abg" style="color:${col}"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" fill="currentColor"/></svg></span></div>`
+          + `<div class="tf-st" style="color:${col}">${esc(st)}</div>`
+          + `<div class="tf-ds">${esc(desc)}</div></div>`;
+      ]]]

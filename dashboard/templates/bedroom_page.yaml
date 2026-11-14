@@ -1,0 +1,164 @@
+bedroom_page:
+  styles:
+    grid:
+      - grid-template-areas: '"hero hero side" "a a a"'
+  custom_fields:
+    hero:
+      card:
+        type: custom:button-card
+        template:
+          - lt_base
+          - lt_hero_room
+          - glass_cta
+        entity: light.bed_light_strip
+        variables:
+          room: Bedroom lights
+          ids: [light.bed_light_strip]
+        styles:
+          card:
+            - height: 250px
+          grid:
+            - grid-template-areas: '"top" "tiles"'
+            - grid-template-columns: minmax(0, 1fr)
+            - grid-template-rows: min-content 1fr
+            - position: relative
+          custom_fields:
+            fx:
+              - position: absolute
+              - top: 0
+              - left: 0
+              - right: 0
+              - bottom: 0
+              - pointer-events: none
+            top:
+              - position: relative
+              - z-index: 2
+              - justify-self: stretch
+              - min-width: 0
+            tiles:
+              - position: relative
+              - z-index: 3
+              - justify-self: start
+              - width: 130px
+              - min-width: 0
+              - align-self: end
+              - margin: 0 22px 22px 22px
+        custom_fields:
+          cta:
+            card:
+              type: custom:button-card
+              template: glass_power_btn
+              entity: light.bed_light_strip
+              variables:
+                is_off: "[[[ return (states['light.bed_light_strip'] ? states['light.bed_light_strip'].state : 'off') !== 'on'; ]]]"
+              tap_action:
+                action: perform-action
+                perform_action: light.toggle
+                target:
+                  entity_id: light.bed_light_strip
+          tiles:
+            card:
+              type: horizontal-stack
+              cards:
+                - type: custom:button-card
+                  template:
+                    - lt_base
+                    - lt_tile
+                  entity: light.bed_light_strip
+                  variables:
+                    name: Light strip
+                    kind: strip
+    a:
+      card:
+        type: custom:button-card
+        show_name: false
+        show_icon: false
+        tap_action:
+          action: none
+        styles:
+          card:
+            - background: none
+            - border: none
+            - box-shadow: none
+            - padding: 0
+            - overflow: visible
+            - height: auto
+          grid:
+            - grid-template-areas: '"l1 . ."'
+            - grid-template-columns: repeat(3, minmax(0, 1fr))
+            - gap: 24px
+            - align-items: start
+          custom_fields:
+            l1:
+              - justify-self: stretch
+              - min-width: 0
+        extra_styles: |
+          @media (max-width: 900px) {
+            #container {
+              grid-template-areas: "l1" !important;
+              grid-template-columns: minmax(0, 1fr) !important;
+            }
+          }
+        custom_fields:
+          l1:
+            card:
+              type: custom:button-card
+              template:
+                - lt_base
+                - lt_card
+              entity: light.bed_light_strip
+              custom_fields:
+                head:
+                  card:
+                    type: custom:button-card
+                    template:
+                      - lt_base
+                      - lt_head
+                    entity: light.bed_light_strip
+                    variables:
+                      name: Light strip
+                      kind: strip
+                bri:
+                  card:
+                    type: tile
+                    entity: light.bed_light_strip
+                    name: Brightness
+                    hide_state: true
+                    vertical: false
+                    features:
+                      - type: light-brightness
+                sw:
+                  card:
+                    type: horizontal-stack
+                    cards:
+                      - type: custom:button-card
+                        template: lt_sw_candle
+                        variables:
+                          e: light.bed_light_strip
+                      - type: custom:button-card
+                        template: lt_sw_warm
+                        variables:
+                          e: light.bed_light_strip
+                      - type: custom:button-card
+                        template: lt_sw_neutral
+                        variables:
+                          e: light.bed_light_strip
+                      - type: custom:button-card
+                        template: lt_sw_cool
+                        variables:
+                          e: light.bed_light_strip
+                      - type: custom:button-card
+                        template: lt_sw_pink
+                        variables:
+                          e: light.bed_light_strip
+                      - type: custom:button-card
+                        template: lt_sw_blue
+                        variables:
+                          e: light.bed_light_strip
+                      - type: custom:button-card
+                        template: lt_sw_green
+                        variables:
+                          e: light.bed_light_strip
+                      - type: custom:button-card
+                        template: lt_more
+                        entity: light.bed_light_strip

@@ -1,0 +1,7 @@
+# Studio view card (view type: Panel). Needs templates: page_shell, studio_page and the studio_* templates
+type: custom:button-card
+template:
+  - page_shell
+  - studio_page
+grid_options:
+  columns: full

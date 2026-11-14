@@ -1,0 +1,28 @@
+ut_hero:
+  triggers_update: [sensor.electricity_cost_this_month, sensor.gas_cost_this_month, sensor.electricity_usage_this_month, sensor.gas_usage_this_month]
+  custom_fields:
+    body: |
+      [[[
+        const num = (v) => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
+        const st = (id) => states[id] ? states[id].state : undefined;
+        const pick = (re) => { const k = Object.keys(states).find(id => re.test(id)); return k ? states[k].state : undefined; };
+        const d = new Date();
+        const day = d.getDate();
+        const dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        const e = num(st('sensor.electricity_cost_this_month'));
+        const g = num(st('sensor.gas_cost_this_month'));
+        const W = 56;
+        const total = e + g + W;
+        const pct = (x) => total > 0 ? Math.round(x / total * 100) : 0;
+        const gbp = (x) => '£' + x.toFixed(2);
+        const dot = '<span class="ut-dw"><span class="ut-dr"></span><span class="ut-dc"></span></span>';
+        const month = d.toLocaleDateString('en-GB', {month: 'long'});
+        const proj = (e + g) / day * dim + W;
+        const pe = pct(e), pg = pct(g), pw = total > 0 ? 100 - pe - pg : 0;
+        return `<div class="ut" style="min-height:230px"><div class="ut-glow" style="background:radial-gradient(circle at 12% 0%, rgba(255,176,32,0.24) 0%, rgba(255,176,32,0) 48%), radial-gradient(circle at 55% 0%, rgba(255,122,69,0.18) 0%, rgba(255,122,69,0) 46%), radial-gradient(circle at 100% 6%, rgba(77,163,255,0.26) 0%, rgba(77,163,255,0) 52%)"></div>`
+          + `<div class="ut-head"><span class="ut-ttl">Utilities · ${month}</span><span class="ut-upd">Day ${day} of ${dim}<span class="ut-mp"><i style="width:${(day / dim * 100).toFixed(0)}%"></i></span></span></div>`
+          + `<div class="ut-hero"><div><div class="ut-bigm">${gbp(total)}</div><div class="ut-cap">Bills this month · includes £${W} water</div></div>`
+          + `<div class="ut-proj"><div class="ut-projv"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M16,6L18.29,8.29L13.41,13.17L9.41,9.17L2,16.59L3.41,18L9.41,12L13.41,16L19.71,9.71L22,12V6H16Z" fill="currentColor"/></svg>${gbp(proj)}</div><div class="ut-cap">Projected month total</div></div></div>`
+          + `<div class="ut-barw"><div class="ut-sbar"><i style="flex:${e};background:#ffb020"></i><i style="flex:${g};background:#ff7a45"></i><i style="flex:${W};background:#4da3ff"></i></div></div>`
+          + `<div class="ut-leg"><span class="ut-lg"><i style="background:#ffb020"></i>Electricity <b>${gbp(e)} · ${pe}%</b></span><span class="ut-lg"><i style="background:#ff7a45"></i>Gas <b>${gbp(g)} · ${pg}%</b></span><span class="ut-lg"><i style="background:#4da3ff"></i>Water <b>${gbp(W)} · ${pw}%</b></span></div></div>`;
+      ]]]

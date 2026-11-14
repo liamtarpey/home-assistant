@@ -1,0 +1,21 @@
+tfl_dlr:
+  triggers_update:
+    - sensor.dlr_stratford_high_street_northbound
+    - sensor.dlr_stratford_high_street_southbound
+  custom_fields:
+    body: |
+      [[[
+        const rows = [['sensor.dlr_stratford_high_street_northbound', 'To Stratford Intl'], ['sensor.dlr_stratford_high_street_southbound', 'To Woolwich']];
+        const rowsHtml = rows.map(r => {
+          const m = parseFloat(states[r[0]] ? states[r[0]].state : '');
+          const ok = !isNaN(m);
+          const frac = ok ? Math.min(96, Math.max(8, (1 - m / 15) * 100)) : 0;
+          const track = ok
+            ? `<div class="tf-tk"><div class="tf-tf" style="width:${frac.toFixed(0)}%"></div><i class="tf-td" style="left:${frac.toFixed(0)}%"></i></div>`
+            : '<div class="tf-tk"></div>';
+          const mins = ok ? `<b>${Math.round(m)}</b><span>min</span>` : '<span>No trains</span>';
+          return `<div class="tf-dl"><img src="/local/svg/tfl/roundel-dlr-no-text.svg" alt=""><div class="tf-dm"><div class="tf-dn">${r[1]}</div>${track}</div><div class="tf-mins">${mins}</div></div>`;
+        }).join('');
+        return `<div class="tf"><div class="tf-glow" style="background:radial-gradient(circle at 90% 8%, rgba(0,164,167,0.36) 0%, rgba(0,164,167,0) 60%)"></div>`
+          + `<div class="tf-head"><span class="tf-ttl">Next DLR · Stratford High St</span></div>${rowsHtml}</div>`;
+      ]]]

@@ -1,0 +1,34 @@
+ut_energy:
+  triggers_update: [sensor.electricity_cost_this_month, sensor.gas_cost_this_month, sensor.electricity_usage_this_month, sensor.gas_usage_this_month]
+  custom_fields:
+    body: |
+      [[[
+        const num = (v) => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
+        const st = (id) => states[id] ? states[id].state : undefined;
+        const pick = (re) => { const k = Object.keys(states).find(id => re.test(id)); return k ? states[k].state : undefined; };
+        const d = new Date();
+        const day = d.getDate();
+        const dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        const e = num(st('sensor.electricity_cost_this_month'));
+        const g = num(st('sensor.gas_cost_this_month'));
+        const W = 56;
+        const total = e + g + W;
+        const pct = (x) => total > 0 ? Math.round(x / total * 100) : 0;
+        const gbp = (x) => '£' + x.toFixed(2);
+        const dot = '<span class="ut-dw"><span class="ut-dr"></span><span class="ut-dc"></span></span>';
+        const elec = variables.kind === 'elec';
+        const cost = elec ? e : g;
+        const use = num(st(elec ? 'sensor.electricity_usage_this_month' : 'sensor.gas_usage_this_month'));
+        const yc = num(pick(elec ? /^sensor\.octopus_energy_electricity_.*_previous_accumulative_cost$/ : /^sensor\.octopus_energy_gas_.*_previous_accumulative_cost$/));
+        const yu = num(pick(elec ? /^sensor\.octopus_energy_electricity_.*_previous_accumulative_consumption$/ : /^sensor\.octopus_energy_gas_.*_previous_accumulative_consumption_kwh$/));
+        const col = elec ? '#ffb020' : '#ff7a45';
+        const rgb = elec ? '255,176,32' : '255,122,69';
+        const fx = elec
+          ? '<svg class="ut-zap" viewBox="0 0 440 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0 40 L70 40 L84 14 L100 62 L116 30 L130 40 L220 40 L234 20 L250 56 L264 40 L440 40"/></svg>'
+          : [[12, 0, 7], [28, 2.2, 8], [47, 4.1, 6.5], [63, 1.3, 7.5], [78, 5.2, 8.5], [90, 3.3, 7]].map(a => `<i class="ut-ember" style="left:${a[0]}%;animation-delay:-${a[1]}s;animation-duration:${a[2]}s"></i>`).join('');
+        const tile = (l, v, s) => `<div class="ut-tile"><div class="ut-tl">${l}</div><div class="ut-tv">${v}</div>${s ? '<div class="ut-tsub">' + s + '</div>' : ''}</div>`;
+        return `<div class="ut" style="min-height:310px"><div class="ut-glow${elec ? '' : ' ut-flick'}" style="background:radial-gradient(circle at 90% 6%, rgba(${rgb},0.34) 0%, rgba(${rgb},0) 58%)"></div>${fx}`
+          + `<div class="ut-head"><span class="ut-ttl"><span class="ut-ico" style="color:${col}"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="${elec ? 'M7,2V13H10V22L17,10H13L17,2H7Z' : 'M12 2c1 3-2 5-2 8a3 3 0 0 0 6 0c0-1-.5-2-1-3 2 1.5 3 4 3 6a6 6 0 0 1-12 0c0-4 4-7 6-11z'}" fill="currentColor"/></svg></span>${elec ? 'Electricity' : 'Gas'}</span></div>`
+          + `<div class="ut-bigc">${gbp(cost)}</div><div class="ut-cap" style="position:relative">This month so far · ${use.toFixed(1)} kWh</div>`
+          + `<div class="ut-tiles">${tile('Yesterday', gbp(yc), yu.toFixed(1) + ' kWh')}${tile('Daily average', gbp(cost / day), '')}${tile('Projected month', gbp(cost / day * dim), '')}${tile('Share of bills', pct(cost) + '%', 'this month')}</div></div>`;
+      ]]]

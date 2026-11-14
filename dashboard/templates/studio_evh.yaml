@@ -1,0 +1,72 @@
+studio_evh:
+  triggers_update:
+    - switch.office_studio_power_speakers_and_amps_evh_5150iii
+    - binary_sensor.office_power_evh_5150iii_overheated
+    - binary_sensor.office_power_evh_5150iii_overloaded
+    - sensor.office_power_evh_5150iii_current_consumption
+  variables:
+    title_text: EVH 5150III
+    sw: switch.office_studio_power_speakers_and_amps_evh_5150iii
+    pw: sensor.office_power_evh_5150iii_current_consumption
+    hot: binary_sensor.office_power_evh_5150iii_overheated
+    over: binary_sensor.office_power_evh_5150iii_overloaded
+    input: "INPUT: 24A"
+  label: >
+    [[[
+      const bad = states[variables.hot]?.state === 'on' ? 'OVERHEATED' : states[variables.over]?.state === 'on' ? 'OVERLOADED' : '';
+      if (bad) return '<span style="color:#ff6b5e;font-weight:700">' + bad + '</span>';
+      const inp = variables.input ? ` · ${variables.input}` : '';
+      const st = states[variables.sw]?.state;
+      if (!st || ['unavailable', 'unknown'].includes(st)) return 'NOT REACHABLE' + inp;
+      if (st !== 'on') return 'OFF' + inp;
+      const w = parseFloat(states[variables.pw]?.state);
+      const dot = '<span class="live-wrap"><span class="live-ring"></span><span class="live-dot"></span></span>';
+      return dot + (isNaN(w) ? 'ON' : `ON · ${Math.round(w)} W`) + inp;
+    ]]]
+  name: >
+    [[[
+      const st = states[variables.sw]?.state;
+      if (!st || ['unavailable', 'unknown'].includes(st)) return 'EVH5150 offline';
+      return st === 'on' ? 'EVH5150 on' : 'EVH5150 off';
+    ]]]
+  custom_fields:
+    art: >
+      [[[
+        const st = states[variables.sw]?.state;
+        const on = st === 'on';
+        const defs = `<defs><linearGradient id="cab" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b1d22"/><stop offset="1" stop-color="#0f1013"/></linearGradient><linearGradient id="nick" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e4e7ea"/><stop offset="1" stop-color="#8d939a"/></linearGradient><linearGradient id="panel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14161a"/><stop offset="1" stop-color="#0a0b0e"/></linearGradient></defs>`;
+        const base = `<rect x="94" y="1" width="72" height="11" rx="5.5" fill="#1d1f24" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><rect x="84" y="3" width="14" height="9" rx="2" fill="url(#nick)"/><rect x="162" y="3" width="14" height="9" rx="2" fill="url(#nick)"/><rect x="8" y="10" width="244" height="126" rx="8" fill="url(#cab)" stroke="rgba(255,255,255,0.10)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="12" y="14" width="8" height="8" rx="1.5" fill="url(#nick)"/><rect x="240" y="14" width="8" height="8" rx="1.5" fill="url(#nick)"/><rect x="12" y="124" width="8" height="8" rx="1.5" fill="url(#nick)"/><rect x="240" y="124" width="8" height="8" rx="1.5" fill="url(#nick)"/><rect x="24" y="18" width="212" height="36" rx="4" fill="url(#panel)" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="36" r="4.2" fill="#000000" stroke="#6b7078" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><line x1="58.0" y1="36" x2="51.89351770797788" y2="28.72257779036971" stroke="#e8e4dc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="58.0" cy="36" r="5.6" fill="#e8e4dc" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="58.0" cy="36" r="1.6" fill="#8c887f"/><line x1="79.5" y1="36" x2="82.74919136159386" y2="27.07292010253387" stroke="#e8e4dc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="79.5" cy="36" r="5.6" fill="#e8e4dc" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="79.5" cy="36" r="1.6" fill="#8c887f"/><line x1="101.0" y1="36" x2="99.35034231216416" y2="26.644326346384023" stroke="#e8e4dc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="101.0" cy="36" r="5.6" fill="#e8e4dc" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="101.0" cy="36" r="1.6" fill="#8c887f"/><line x1="122.5" y1="36" x2="127.94897614533494" y2="28.218055579254578" stroke="#e8e4dc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="122.5" cy="36" r="5.6" fill="#e8e4dc" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="122.5" cy="36" r="1.6" fill="#8c887f"/><line x1="144.0" y1="36" x2="135.77275866404784" y2="31.25" stroke="#e8e4dc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="144.0" cy="36" r="5.6" fill="#e8e4dc" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="144.0" cy="36" r="1.6" fill="#8c887f"/><line x1="165.5" y1="36" x2="167.14965768783583" y2="26.644326346384023" stroke="#e8e4dc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="165.5" cy="36" r="5.6" fill="#e8e4dc" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="165.5" cy="36" r="1.6" fill="#8c887f"/><line x1="187.0" y1="36" x2="193.7175144212722" y2="29.282485578727798" stroke="#e8e4dc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="187.0" cy="36" r="5.6" fill="#e8e4dc" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="187.0" cy="36" r="1.6" fill="#8c887f"/><line x1="208.5" y1="36" x2="204.48512651346334" y2="27.390076023151828" stroke="#e8e4dc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="208.5" cy="36" r="5.6" fill="#e8e4dc" stroke="rgba(0,0,0,0.35)" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="208.5" cy="36" r="1.6" fill="#8c887f"/><circle cx="226" cy="36" r="6.5" fill="#2a0c0c" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="226" cy="36" r="3.4" fill="#5b1713"/><rect x="24" y="60" width="212" height="68" rx="4" fill="#07080a" stroke="rgba(255,255,255,0.07)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="65.0" x2="230" y2="65.0" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="69.75" x2="230" y2="69.75" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="74.5" x2="230" y2="74.5" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="79.25" x2="230" y2="79.25" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="84.0" x2="230" y2="84.0" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="88.75" x2="230" y2="88.75" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="93.5" x2="230" y2="93.5" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="98.25" x2="230" y2="98.25" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="103.0" x2="230" y2="103.0" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="107.75" x2="230" y2="107.75" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="112.5" x2="230" y2="112.5" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="117.25" x2="230" y2="117.25" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="122.0" x2="230" y2="122.0" stroke="rgba(255,255,255,0.10)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><text x="32" y="124" style="font-family:Impact, 'Arial Black', sans-serif;font-size:26px;font-weight:900;letter-spacing:1px;fill:rgba(255,255,255,0.92);text-anchor:start;font-style:italic;stroke:#07080a;stroke-width:3px;paint-order:stroke;stroke-linejoin:round">EVH</text><text x="230" y="123" style="font-family:Arial, sans-serif;font-size:8.5px;font-weight:700;letter-spacing:2.2px;fill:rgba(255,255,255,0.65);text-anchor:end;stroke:#07080a;stroke-width:3px;paint-order:stroke;stroke-linejoin:round">5150III</text>`;
+        const lit = `<rect x="24" y="60" width="212" height="68" rx="4" fill="rgba(255,40,30,0.16)"/><line x1="30" y1="65.0" x2="230" y2="65.0" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="69.75" x2="230" y2="69.75" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="74.5" x2="230" y2="74.5" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="79.25" x2="230" y2="79.25" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="84.0" x2="230" y2="84.0" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="88.75" x2="230" y2="88.75" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="93.5" x2="230" y2="93.5" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="98.25" x2="230" y2="98.25" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="103.0" x2="230" y2="103.0" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="107.75" x2="230" y2="107.75" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="112.5" x2="230" y2="112.5" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="117.25" x2="230" y2="117.25" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><line x1="30" y1="122.0" x2="230" y2="122.0" stroke="rgba(255,64,50,0.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><text x="32" y="124" style="font-family:Impact, 'Arial Black', sans-serif;font-size:26px;font-weight:900;letter-spacing:1px;fill:rgba(255,255,255,0.95);text-anchor:start;font-style:italic;stroke:#1a0505;stroke-width:3px;paint-order:stroke;stroke-linejoin:round">EVH</text><text x="230" y="123" style="font-family:Arial, sans-serif;font-size:8.5px;font-weight:700;letter-spacing:2.2px;fill:rgba(255,255,255,0.75);text-anchor:end;stroke:#1a0505;stroke-width:3px;paint-order:stroke;stroke-linejoin:round">5150III</text><circle cx="226" cy="36" r="15" fill="rgba(255,60,50,0.18)"/><circle cx="226" cy="36" r="10" fill="rgba(255,60,50,0.30)"/><circle cx="226" cy="36" r="6.5" fill="#ff3b30" stroke="rgba(255,255,255,0.35)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="224.5" cy="34.5" r="2" fill="#ffd6d2"/>`;
+        const glow = on ? 'radial-gradient(circle at 70% 40%, rgba(255,60,50,0.28) 0%, rgba(255,60,50,0) 62%)' : 'none';
+        const tone = on ? '' : 'filter:grayscale(0.35) brightness(0.85);';
+        return `<div class="amp-fx" style="background:${glow}"><svg class="amp-svg" viewBox="0 0 260 140" style="${tone}">${defs}${base}${on ? lit : ''}</svg></div>`;
+      ]]]
+    cta:
+      card:
+        type: custom:button-card
+        template: glass_power_btn
+        triggers_update:
+          - switch.office_studio_power_speakers_and_amps_evh_5150iii
+        variables:
+          is_off: "[[[ return states['switch.office_studio_power_speakers_and_amps_evh_5150iii']?.state !== 'on'; ]]]"
+        tap_action:
+          action: perform-action
+          perform_action: switch.toggle
+          target:
+            entity_id: switch.office_studio_power_speakers_and_amps_evh_5150iii
+  extra_styles: |
+    .amp-fx { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+    .amp-fx::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 35%, rgba(0,0,0,0) 100%); pointer-events: none; }
+    .amp-svg { position: absolute; right: 16px; top: 60px; width: 236px; height: 127px; overflow: visible; }
+  styles:
+    custom_fields:
+      art:
+        - position: absolute
+        - top: 0
+        - left: 0
+        - right: 0
+        - bottom: 0
+        - z-index: 0
+        - pointer-events: none
+    name:
+      - font-size: 26px
